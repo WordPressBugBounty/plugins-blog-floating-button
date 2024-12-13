@@ -37,10 +37,20 @@
 	//共通設定(デバイス別の設定なし)
 	$output .= $sep;
 	$output .= '# 共通設定'. $eol;
-	foreach( $this->commonItems as $commonItem => $validates ){
-		$output .= $li .  $commonItem . ' ： ' . $this->get_metadata($commonItem) . $eol;
+	foreach( $this->commonItems as $commonItem => $validates ) {
+		$metadata = $this->get_metadata($commonItem);
+		
+		if (is_array($metadata)) {
+			// 配列の場合はカンマ区切りで文字列に変換
+			$metadataStr = implode(', ', $metadata);
+		} else {
+			// 配列でない場合はそのまま使用
+			$metadataStr = $metadata;
+		}
+		
+		$output .= $li .  $commonItem . ' ： ' . $metadataStr . $eol;
 	}
-
+	
 	// デザイン項目
 	$output .= $sep;
 	$output .= '# BFBデザイン設定'. $eol;

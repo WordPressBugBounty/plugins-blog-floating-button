@@ -3,7 +3,7 @@
 Plugin Name: Blog Floating Button
 Plugin URI: https://bfb-plugin.com/
 Description: 「Blog Floating Button(BFB)」はブログ内にフロートボタンを簡単に実装できるプラグインです。
-Version: 1.4.15
+Version: 1.4.16
 Author: Meril Inc.
 Author URI: https://meril.co.jp/
 License: GPL2
@@ -25,6 +25,8 @@ class BlogFloatingButton {
 	private $get_license_key_optimize_status_url = 'https://bfb-plugin.com/api/function/get_license_key_optimize_status.php';
 	private $get_admin_ad_url                    = 'https://bfb-plugin.com/api/function/get_admin_ad.php';
 	private $echo_bfb_optimize_url               = '/wp-json/bfb/api/echo_bfb_optimize';
+	private $js_is_pro                           = 0;
+	private $js_is_autohide                      = 0;
 
 	public $is_activation          = false;
 	public $is_activation_optimize = false;
@@ -155,6 +157,16 @@ class BlogFloatingButton {
 		}
 
 		$this->init_var(); // クラス変数を初期化
+
+		// pro版にのみショートコードを登録する (v1.4.16)
+		add_action( 'init', array( $this, 'bfb_register_shortcode_for_pro' ) );
+	}
+	// pro版にのみショートコードを登録する (v1.4.16)
+	public function bfb_register_shortcode_for_pro() {
+		if ( $this->check_license_key() ) {
+			add_shortcode( 'bfb_show', 'bfb_show_position' );
+			add_shortcode( 'bfb_hide', 'bfb_hide_position' );
+		}
 	}
 
 	// 追跡フッターメイン
@@ -165,9 +177,9 @@ class BlogFloatingButton {
 		// 管理画面ではCookieは無視
 		if ( ! is_admin() ) {
 			// cookieが記録されていれば、非表示
-			$cookie_bfb_closed = filter_input(INPUT_COOKIE, 'bfb_closed');
-			$cookie_bfb_closed = $cookie_bfb_closed !== null ? htmlspecialchars($cookie_bfb_closed, ENT_QUOTES, 'UTF-8') : '';
-			
+			$cookie_bfb_closed = filter_input( INPUT_COOKIE, 'bfb_closed' );
+			$cookie_bfb_closed = $cookie_bfb_closed !== null ? htmlspecialchars( $cookie_bfb_closed, ENT_QUOTES, 'UTF-8' ) : '';
+
 			if ( $cookie_bfb_closed == 'true' ) {
 				return false;
 			}
@@ -272,16 +284,34 @@ class BlogFloatingButton {
 			$bfb_cookie_hide_span = $this->bfb_cookie_hide_span;
 		}
 
-		if ( isset( $this->bfb_autohide ) && $this->bfb_autohide != 'off' ) :
-
+		// pro版の時出現ポイントの領域を取得する.無料版は値は使わないがダミーとして0を入れておく (v1.4.16)
+		if ( $this->check_license_key() ) {
 			if ( ! empty( $this->{'bfb_showing_area_' . $device} ) ) {
 				$bfb_showing_area = $this->{'bfb_showing_area_' . $device};
 			} else {
 				$bfb_showing_area = 300;
 			}
+		} else {
+			$bfb_showing_area = 0;
+		}
 
-			echo $this->delete_br(
-				'
+		// jsからpro版かどうかの判定できるように変数を用意 (v1.4.16)
+		if ( $this->check_license_key() ) {
+			$js_is_pro = 1;
+		} else {
+			$js_is_pro = 0;
+		}
+
+		// jsから自動非表示機能の設定を判定できるように変数を用意 (v1.4.16)
+		if ( isset( $this->bfb_autohide ) && $this->bfb_autohide != 'off' ) {
+			$js_is_autohide = 1;
+		} else {
+			$js_is_autohide = 0;
+		}
+
+		// jsの内容を大幅変更 (v1.4.16)
+		echo $this->delete_br(
+			'
 
 <script type="text/javascript">
 jQuery(function($){
@@ -292,56 +322,107 @@ jQuery(function($){
 		var scrollTop = 0;
 		var bfb_show_pos = 0;
 		var bfb_hide_pos = 99999999;
+		var bfb_showing_area = ' . $bfb_showing_area . ';
+		var is_autohide = ' . $js_is_autohide . ';
+		var is_pro = ' . $js_is_pro . ';
+		var has_show_pos = 0;
+		var has_hide_pos = 0;
 
 		if( $("#bfb_show_position").length ){
 			bfb_show_pos = $("#bfb_show_position").offset().top;
+			has_show_pos = 1;
 		}
 		if( $("#bfb_hide_position").length ){
 			bfb_hide_pos = $("#bfb_hide_position").offset().top;
+			has_hide_pos = 1;
 		}
 
-		$(window).on(\'scroll\',function(){
-		
-		    scrollTop = $(this).scrollTop();
-		    scrollCnt++;
-		
-			if( bfb_show_pos < (scrollTop+windowHeight) && bfb_hide_pos > (scrollTop+windowHeight) ){
+		/* 表示/非表示を管理する関数 */
+		function toggleDisplay() {
+            scrollTop = $(window).scrollTop();
+			scrollCnt++;
 
-			    if( (bfb_show_pos+' . $bfb_showing_area . ') < (scrollTop+windowHeight) ){
-			    	/*出現ポイントから一定位置までは非表示にしない*/
-				    if( scrollTop < startPos ){
-				        $(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
-				        $(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
-				    }else{
-				    	if( 10 < scrollCnt ){
-				        	$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
-				        	scrollCnt = 0;
-				        }
-				    }
-				}else{
-					/*出現ポイントから一定位置までは表示*/
+			if (is_autohide == 0) {
+				/*常に表示の場合*/
+				if (is_pro == 0) {
+					/*proでない場合、出現ポイントの設定値やショートコードの位置に関わらず常に表示*/
 					$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
 					$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+				}else{
+					/*proの場合、ショートコードで設定された条件内で表示。ショートコードない場合は0~99999999が設定されるため事実上無条件に表示される*/
+					if( bfb_show_pos < (scrollTop+windowHeight) && bfb_hide_pos > (scrollTop+windowHeight) ){
+						if( has_show_pos == 1 ){
+							/*ショートコード[bfb_show]が設定されている場合、[bfb_show]が設定されているとこから、出現ポイントの領域に設定された数値分表示し続ける。*/
+							if( (bfb_show_pos + bfb_showing_area) < (scrollTop + windowHeight) ){
+								$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+							} else {
+								$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+								$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+							}
+						}else{
+							/*ショートコード[bfb_show]が設定されていない場合[bfb_hide]より上で常に表示*/
+							$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+							$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+						}
+					}else{
+						$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+					}
 				}
-
-			}else if( bfb_show_pos > (scrollTop+windowHeight) ){
-				/*表示ポイント以前は非表示*/
-				$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
-			}else if( bfb_hide_pos < (scrollTop+windowHeight) ){
-				/*非表示ポイント以降は非表示*/
-				$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+			}else{
+				/*下スクロール時は表示の場合*/
+				if (is_pro == 0) {
+					/*proでない場合、出現ポイントの設定値やショートコードの位置に関わらず下スクロー時は非表示*/
+					if( scrollTop < startPos ){
+						$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+						$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+					}else{
+						if( 10 < scrollCnt ){
+							$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+							scrollCnt = 0;
+						}
+					}
+				}else{
+					/*proの場合、ショートコードで設定された条件内で表示。ショートコードない場合は0~99999999が設定されるため事実上無条件に表示される*/
+					if( bfb_show_pos < (scrollTop+windowHeight) && bfb_hide_pos > (scrollTop+windowHeight) ){
+						if( (bfb_show_pos ) < (scrollTop+windowHeight) ){
+							/*出現ポイントから一定位置までは非表示にしない*/
+							if( scrollTop < startPos ){
+								$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+								$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+							}else{
+								if( 10 < scrollCnt ){
+									$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+									scrollCnt = 0;
+								}
+							}
+						}else{
+							/*出現ポイントから一定位置までは表示*/
+							$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+							$(\'[id^="bfb_content_"]\').removeClass(\'bfb_hide\');
+						}
+					}else if( bfb_show_pos > (scrollTop+windowHeight) ){
+						/*表示ポイント以前は非表示*/
+						$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+					}else if( bfb_hide_pos < (scrollTop+windowHeight) ){
+						/*非表示ポイント以降は非表示*/
+						$(\'[id^="bfb_content_"]\').addClass(\'bfb_hide\');
+					}
+				}
 			}
-		    startPos = scrollTop;
+			startPos = scrollTop;
+        }
 
-		});
+		/* 読み込み時にもチェック */
+        toggleDisplay();
+
+        /* スクロールイベントでもチェック */
+        $(window).on(\'scroll\', toggleDisplay);
 	});
 });
 </script>
 
 '
-			);
-
-endif;
+		);
 
 		echo $this->delete_br(
 			'
@@ -473,17 +554,17 @@ jQuery(function($){
 				if ( isset( $category_ids ) && count( $category_ids ) > 1 ) {
 					// 複数カテゴリーに所属
 					foreach ( $category_ids as $category_id ) {
-						$categiry_meta[ $i ]                = get_option( "cat_$category_id", [] );
+						$categiry_meta[ $i ]                = get_option( "cat_$category_id", array() );
 						$categiry_meta[ $i ]['category_id'] = $category_id;
 						++$i;
 					}
 				} else {
 					// 単一カテゴリーに所属
-					$categiry_meta[ $i ]                = isset( $category_ids ) ? get_option( "cat_$category_ids[0]" ) : null;
+					$categiry_meta[ $i ] = isset( $category_ids ) ? get_option( "cat_$category_ids[0]" ) : null;
 
 					// PHP8.1対応。＄categiry_metaがfalseの場合、配列に変換する
-					if (!isset($categiry_meta[ $i ]) || !is_array($categiry_meta[ $i ])) {
-						$categiry_meta[ $i ] = [];
+					if ( ! isset( $categiry_meta[ $i ] ) || ! is_array( $categiry_meta[ $i ] ) ) {
+						$categiry_meta[ $i ] = array();
 					}
 
 					$categiry_meta[ $i ]['category_id'] = isset( $category_ids ) ? $category_ids[0] : null;
@@ -782,14 +863,13 @@ jQuery(function($){
 		// svgファイルを外部読み込みにすると、読み込み時間が異常に増えるのでコードを直接埋め込む
 		$svg_path = '<svg class="bfb_icon" version="1.1" aria-hidden="true" focusable="false" id="circle-arrow" class="circle-arrow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="13px" role="img" viewBox="0 0 496 496"><path fill="currentColor" d="M256,8C393,8,504,119,504,256S393,504,256,504,8,393,8,256,119,8,256,8ZM369.9,239,234.4,103.5a23.9,23.9,0,0,0-33.9,0l-17,17a23.9,23.9,0,0,0,0,33.9L285.1,256,183.5,357.6a23.9,23.9,0,0,0,0,33.9l17,17a23.9,23.9,0,0,0,33.9,0L369.9,273A24,24,0,0,0,369.9,239Z" /></svg>';
 
-
 		// ボタンHTML生成
 		if ( $bfbDatas['designType'] == 'textBtn' ) {
 			$btn_html = $bfbDatas['topText'] . '<a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" class="bfb_btn bfb_' . esc_attr( $bfbDatas['btnColor'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText'] ) . $svg_path . '</a>';
 		} elseif ( $bfbDatas['designType'] == 'textTextBtn' ) {
-			$btn_html = $bfbDatas['topText'] . '<div class="bfb_parts_2"><div class="bfb_discText">' . wp_kses( $bfbDatas['discText'], $this->allowed_html ) . '</div><a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" class="bfb_btn bfb_' . esc_attr( $bfbDatas['btnColor'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText'] ) .  $svg_path . '</a></div>';
+			$btn_html = $bfbDatas['topText'] . '<div class="bfb_parts_2"><div class="bfb_discText">' . wp_kses( $bfbDatas['discText'], $this->allowed_html ) . '</div><a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" class="bfb_btn bfb_' . esc_attr( $bfbDatas['btnColor'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText'] ) . $svg_path . '</a></div>';
 		} elseif ( $bfbDatas['designType'] == 'textBtnTextBtn' ) {
-			$btn_html = $bfbDatas['topText'] . '<div class="bfb_parts_2"><a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" class="bfb_btn bfb_' . esc_attr( $bfbDatas['btnColor'] ) . '"  target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText'] ) .  $svg_path . '</a><a href="' . esc_url( $bfbDatas['linkUrl2'] ) . '" class="bfb_btn2 bfb_' . esc_attr( $bfbDatas['btnColor2'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget2'] ) . '" rel="' . esc_attr( $bfbDatas['noopener2'] ) . ' ' . esc_attr( $bfbDatas['linkRel2'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo2'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText2'] ) .  $svg_path . '</a></div>';
+			$btn_html = $bfbDatas['topText'] . '<div class="bfb_parts_2"><a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" class="bfb_btn bfb_' . esc_attr( $bfbDatas['btnColor'] ) . '"  target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText'] ) . $svg_path . '</a><a href="' . esc_url( $bfbDatas['linkUrl2'] ) . '" class="bfb_btn2 bfb_' . esc_attr( $bfbDatas['btnColor2'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget2'] ) . '" rel="' . esc_attr( $bfbDatas['noopener2'] ) . ' ' . esc_attr( $bfbDatas['linkRel2'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo2'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '">' . esc_html( $bfbDatas['btnText2'] ) . $svg_path . '</a></div>';
 		} elseif ( $bfbDatas['designType'] == 'imgBanner' ) {
 			$btn_html = '<a href="' . esc_url( $bfbDatas['linkUrl'] ) . '" target="_' . esc_attr( $bfbDatas['linkTarget'] ) . '" rel="' . esc_attr( $bfbDatas['noopener'] ) . ' ' . esc_attr( $bfbDatas['linkRel'] ) . '" bfb-memo="' . esc_attr( $bfbDatas['trackingMemo'] ) . '" bfb-optimize-id="' . esc_attr( $bfbDatas['optimize_id'] ) . '" bfb-optimize-type="' . esc_attr( $bfbDatas['optimize_type'] ) . '"><img src="' . esc_url( $bfbDatas['bannerUrl'] ) . '" alt=""></a>';
 		}
@@ -1345,7 +1425,7 @@ jQuery(function($){
 		return ob_get_clean();
 	}
 
-	
+
 	private function compile_scss( $data ) {
 		$scss = new scssc();
 		return $scss->compile( $data );
