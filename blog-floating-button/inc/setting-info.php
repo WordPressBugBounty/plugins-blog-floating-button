@@ -97,6 +97,7 @@
 	}
 	$output .= $sep;
 	$output .= '# 個別設定を優先しているカテゴリー一覧'. $eol;
+	$this_bfb_use_category = null;
 	if (!empty($filtered_options)){
 		// 取得したオプションを出力
 		foreach ($filtered_options as $option_name => $option_value) {
