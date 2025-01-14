@@ -3,7 +3,7 @@
 Plugin Name: Blog Floating Button
 Plugin URI: https://bfb-plugin.com/
 Description: 「Blog Floating Button(BFB)」はブログ内にフロートボタンを簡単に実装できるプラグインです。
-Version: 1.4.17
+Version: 1.4.18
 Author: Meril Inc.
 Author URI: https://meril.co.jp/
 License: GPL2
@@ -161,7 +161,7 @@ class BlogFloatingButton {
 		// pro版にのみショートコードを登録する (v1.4.16)
 		add_action( 'init', array( $this, 'bfb_register_shortcode_for_pro' ) );
 	}
-	// pro版にのみショートコードを登録する (v1.4.16)
+	// pro版にのみショートコードを登録する。タイミングの問題でアクティベーションチェックが必要。(v1.4.16)
 	public function bfb_register_shortcode_for_pro() {
 		if ( $this->check_license_key() ) {
 			add_shortcode( 'bfb_show', 'bfb_show_position' );
@@ -1232,29 +1232,76 @@ jQuery(function($){
 	// PRO版ライセンスキーのチェック
 	public function check_license_key() {
 
-		$license_key = get_option( 'bfb_license_key' );
+		$license_key = get_option('bfb_license_key');
 
-		if ( isset( $license_key ) && ! $this->is_validate( $license_key, 'license_key' ) ) {
+		// キャッシュされた情報を取得
+		$cache = get_transient('bfb_license_key_check_cache');
+		
+		// 現在の時間を取得
+		$current_time = time();
+		$thirty_days = 30 * 24 * 60 * 60; // 30日(秒単位)
+	
+		// キャッシュがあり、ライセンスキーがキャッシュと同じで、キャッシュ期間が有効な場合
+		if ($cache && $cache['license_key'] === $license_key && ($current_time - $cache['time_checked']) < $thirty_days) {
+			// キャッシュされた結果を返す
+			$this->is_activation = $cache['is_activation'];
+			return $cache['is_activation'];
+		}
+	
+		// キャッシュがないもしくは期限切れもしくはキーが変更されていた場合、キャッシュを削除する
+		delete_transient('bfb_license_key_check_cache');
+		
+		// ライセンスキーを無効をはじく
+		if (isset($license_key) && !$this->is_validate($license_key, 'license_key')) {
+			$this->is_activation = false;
 			return false;
 		}
 
-		$data = array( 'body' => array( 'license_key' => $license_key ) );
-		$res  = wp_remote_post( $this->get_license_key_status_url, $data );
-		$body = wp_remote_retrieve_body( $res );
-
-		if ( $body == 'true' ) {
+		// 新しいライセンスキーをサーバーに問い合わせ
+		$data = array('body' => array('license_key' => $license_key));
+		$res = wp_remote_post($this->get_license_key_status_url, $data);
+		$body = wp_remote_retrieve_body($res);
+	
+		
+		$is_activation = ($body == 'true');
+		if ($is_activation) {
 			$this->is_activation = true;
-			return true;
 		}
-
-		return false;
+	
+		// 新しい情報でキャッシュを更新（1週間有効）
+		set_transient('bfb_license_key_check_cache', [
+			'license_key' => $license_key,
+			'is_activation' => $is_activation,
+			'time_checked' => $current_time
+		], $thirty_days);
+	
+		return $is_activation;
 	}
+
 	// A/Bテスト専用ライセンスキーのチェック
 	public function check_license_key_optimize() {
 
 		$license_key = get_option( 'bfb_license_key_optimize' );
 
-		if ( isset( $license_key ) && ! $this->is_validate( $license_key, 'license_key' ) ) {
+		// キャッシュされた情報を取得
+		$cache = get_transient('bfb_license_key_optimize_cache');
+
+		// 現在の時間を取得
+		$current_time = time();
+		$thirty_days = 30 * 24 * 60 * 60; // 30日(秒単位)
+
+		// キャッシュがあり、ライセンスキーがキャッシュと同じで、キャッシュ期間が有効な場合
+		if ($cache && $cache['license_key'] === $license_key && ($current_time - $cache['time_checked']) < $thirty_days) {
+			// キャッシュされた結果を返す
+			$this->is_activation_optimize = $cache['is_activation'];
+			return $cache['is_activation'];
+		}
+
+		// キャッシュがないもしくは期限切れもしくはキーが変更されていた場合、キャッシュを削除する
+		delete_transient('bfb_license_key_optimize_cache');
+
+		if (isset($license_key) && !$this->is_validate($license_key, 'license_key')) {
+			$this->is_activation_optimize = false;
 			return false;
 		}
 
@@ -1270,12 +1317,19 @@ jQuery(function($){
 		$res  = wp_remote_post( $this->get_license_key_optimize_status_url, $data );
 		$body = wp_remote_retrieve_body( $res );
 
-		if ( $body == 'true' ) {
+		$is_activation = ($body == 'true');
+		if ($is_activation) {
 			$this->is_activation_optimize = true;
-			return true;
 		}
 
-		return false;
+		// 新しい情報でキャッシュを更新（1週間有効）
+		set_transient('bfb_license_key_optimize_cache', [
+			'license_key' => $license_key,
+			'is_activation' => $is_activation,
+			'time_checked' => $current_time
+		], $thirty_days);
+
+		return $is_activation;
 	}
 
 	public function get_ad_html() {
