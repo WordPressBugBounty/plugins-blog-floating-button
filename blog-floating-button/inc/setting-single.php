@@ -2,7 +2,7 @@
 	<tbody>
 <?php if( $pagenow == 'post.php' ): ?>
 		<tr>
-			<th>個別設定の使用<span class="bfb_popup_help" data-message="個別設定の使用方法を選択できます。">?</span></th>
+			<th>個別設定の使用<span class="bfb_popup_help" data-message="個別設定の使用方法を選択できます。">?</span><br><span style="font-size:0.8em;">プレビューは個別設定のものです。</span></th>
 			<td>
 				<?php
 					$bfb_use_post_select_use = '';
@@ -96,7 +96,8 @@
 <?php endif; ?>
 <?php if( $pagenow == 'term.php' ): ?>
 		<tr>
-			<th>個別設定の使用<span class="bfb_popup_help" data-message="個別設定の使用方法を選択できます。">?</span></th>
+			<th>個別設定の使用<span class="bfb_popup_help" data-message="個別設定の使用方法を選択できます。">?</span><br><span style="font-size:0.8em;">プレビューは個別設定のものです。</span></th>
+			<td>
 			<td>
 				<?php
 					$bfb_use_category_select_use = '';

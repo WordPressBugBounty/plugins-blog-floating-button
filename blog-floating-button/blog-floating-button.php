@@ -3,7 +3,7 @@
 Plugin Name: Blog Floating Button
 Plugin URI: https://bfb-plugin.com/
 Description: 「Blog Floating Button(BFB)」はブログ内にフロートボタンを簡単に実装できるプラグインです。
-Version: 1.4.18
+Version: 1.4.19
 Author: Meril Inc.
 Author URI: https://meril.co.jp/
 License: GPL2
@@ -19,7 +19,6 @@ if ( strpos( $_SERVER['HTTP_HOST'], 'dev.' ) !== false ) {
 class BlogFloatingButton {
 
 	const PLUGIN_PATH = __FILE__;// プラグインディレクトリパス
-
 	public $metadate                             = array();
 	private $get_license_key_status_url          = 'https://bfb-plugin.com/api/function/get_license_key_status.php';
 	private $get_license_key_optimize_status_url = 'https://bfb-plugin.com/api/function/get_license_key_optimize_status.php';
@@ -31,6 +30,8 @@ class BlogFloatingButton {
 	public $is_activation          = false;
 	public $is_activation_optimize = false;
 	private $echo_bfb_num          = 0;
+
+	public $abtest_message  = '<p style="font-size:0.8em; margin-top:40px;">ABテスト稼働中は、こちらのプレビューは無効になります。該当のABテスト内でプレビューをご確認ください。<br>こちらで設定したプレビューを表示したい場合は、ABテストを「実施しない」に変更してください。</p>';
 
 	public $devices     = array( 'pc', 'sp' );
 	public $devicesName = array(
@@ -250,6 +251,8 @@ class BlogFloatingButton {
 				$this->generate_btn_html( 'pc' );  // フロートボタンHTML生成
 			}
 
+			// 初期化
+			$this->optDatas = null;
 			$this->init_optimize( 'sp' );  // 最適化データ読み込み
 			if ( empty( $this->{'bfb_optId_sp'} ) ) {
 				// スマホ出力
@@ -438,6 +441,9 @@ jQuery(function($){
 
 			foreach ( $this->devices as $device ) {
 
+				// 初期化
+				$this->init_optimize( $device );
+
 				if ( ! empty( $this->{'bfb_optId_' . $device} ) ) {
 					// 最適化テストではキャッシュ対策のためajaxで出力
 
@@ -525,8 +531,7 @@ jQuery(function($){
 		}
 
 		// 設定データの読み込み
-		if ( is_singular() || $post_type == 'single' || $pagenow == 'post.php' ) {
-
+		if ( is_singular() || $post_type == 'single' ) {
 			if ( get_post_meta( $post_id, 'bfb_use_post', true ) == 'true' ) {
 				// 個別記事の設定を優先
 				$this->read_metadata( $post_id, 'single' );
@@ -589,7 +594,10 @@ jQuery(function($){
 					$this->read_metadata();
 				}
 			}
-		} elseif ( $pagenow == 'term.php' ) {
+		} elseif ( $pagenow == 'post.php' ) {
+			// 投稿画面
+			$this->read_metadata( $post_id, 'single' );
+		}elseif ( $pagenow == 'term.php' ) {
 			// カテゴリー設定画面
 			$get_tag_ID = filter_input( INPUT_GET, 'tag_ID', FILTER_VALIDATE_INT );
 			if ( $this->is_validate( $get_tag_ID, 'int' ) ) {
@@ -640,6 +648,7 @@ jQuery(function($){
 				$this->bfb_use_post                  = get_post_meta( $post_id, 'bfb_use_post', true );
 				$this->{'bfb_designType_' . $device} = get_post_meta( $post_id, 'bfb_designType_' . $device, true );
 				$this->{'bfb_optId_' . $device}      = get_post_meta( $post_id, 'bfb_optId_' . $device, true );
+
 			} elseif ( $post_id && $page_type == 'category' ) {
 				// カテゴリー編集
 				$category_meta = get_option( "cat_$post_id" );
@@ -688,6 +697,8 @@ jQuery(function($){
 	}
 	// 最適化データ読み込み
 	private function init_optimize( $device ) {
+		// **optDatasを確実に初期化**
+		$this->optDatas = [];
 
 		// 最適化テスト中
 		if ( ! empty( $this->{'bfb_optId_' . $device} ) ) {
@@ -738,10 +749,20 @@ jQuery(function($){
 		$bfbDatas['optimize_id']   = ''; // A/Bテスト時のみ使用
 		$bfbDatas['optimize_type'] = ''; // A/Bテスト時のみ使用
 
-		if ( ! $preview_datas && empty( $this->{'bfb_optId_' . $device} ) ) {
+		// A/Bテスト専用ライセンスキーを無効にしても、ABテストが動いてしまうことを防ぐため、A/Bテスト専用ライセンスキーを無効であればテストIDを空にする
+		if( is_admin() && !$this->is_activation_optimize ) {
+			$this->{'bfb_optId_' . $device} = '';
+		}
+
+		// 管理画面でpro版の場合はライブプレビューをONにするフラグ
+		$admin_pro_flg = false;
+		if(is_admin() && $this->is_activation){
+			$admin_pro_flg = true;
+		}
+
+		if ( (! $preview_datas && empty( $this->{'bfb_optId_' . $device} )) || $admin_pro_flg) {
 			// ライブプレビュー以外かつ最適化テスト以外
 			// 本番、設定画面の初期表示
-
 			$bfbDatas['designType'] = $this->designType;
 
 			// フロートボタン内容
@@ -757,9 +778,10 @@ jQuery(function($){
 			if ( is_admin() ) {
 				$bfbDatas['optimize_preview'] = 'true'; // scssの共通部分を出力
 			}
-		} elseif ( ! empty( $this->{'bfb_optId_' . $device} ) && $this->{'bfb_optId_' . $device} != 'false' ) {
+		} elseif ( ! empty( $this->{'bfb_optId_' . $device} ) && $this->{'bfb_optId_' . $device} != 'false') {
 			// 最適化テスト実施中
 			// ajaxで読み込み
+			// 管理画面でない(管理画面でABテストが行われていても、通常のボタンを表示する。ABテストボタンはABテストボタンページで確認してもらう)
 
 			$this->init_optimize( $device );  // 最適化データ読み込み
 
@@ -803,6 +825,7 @@ jQuery(function($){
 			$bfbDatas['ajax_echo'] = true;
 
 		} else {
+			// 最適化テストが行われていない
 			// ライブプレビュー時
 			if ( isset( $preview_datas['designType'] ) ) {
 				$bfbDatas['designType'] = $preview_datas['designType'];
@@ -864,8 +887,11 @@ jQuery(function($){
 		// SPは非表示→PCをajaxで出力
 		// PCで共通部分のCSSを出力
 		// CSS共通部分がないとSP表示が崩れる
+		$bfb_hide = '';
 		if ( ! empty( $this->{'bfb_optId_pc'} ) && $this->{'bfb_optId_pc'} != 'false' ) {
-			$bfb_hide = 'style="display: none !important;"';
+			if ( !is_admin() ) {
+				$bfb_hide = 'style="display: none !important;"';
+			}
 		} else {
 			$bfb_hide = '';
 		}
@@ -896,13 +922,28 @@ jQuery(function($){
 		$echo_html .= $this->delete_br( $this->compile_scss( $bfb_btn_scss ) );
 		$echo_html .= '</style>';
 
-		if ( ( isset( $bfbDatas['live_preview'] ) && $bfbDatas['live_preview'] ) || ( isset( $bfbDatas['ajax_echo'] ) && $bfbDatas['ajax_echo'] ) ) {
-			return $echo_html;
-		} elseif ( empty( $this->{'bfb_optId_' . $bfbDatas['device']} ) ) {
-				// ABテストでは出力しない
-				// キャッシュによりABできないため
-				// Ajaxで取得→出力
+		// 管理画面の場合
+		// 最適化テスト中であればプレビューを停止。それ以外は表示
+		if ( is_admin() ) {
+			$current_screen = get_current_screen();
+			// ABテスト結果画面ではABテスト実行中でもメッセージは出さずプレビューを出力する
+			if ($current_screen && $current_screen->id === 'blog-floating-button_page_blog-floating-button-optimize-report') {
 				echo $echo_html;
+			}
+			elseif ($admin_pro_flg && empty( $this->{'bfb_optId_' . $device} )){
+				echo $echo_html;
+			}else{
+				echo wp_kses_post($this->abtest_message); 
+			}
+		}else{
+			if ( ( isset( $bfbDatas['live_preview'] ) && $bfbDatas['live_preview'] ) || ( isset( $bfbDatas['ajax_echo'] ) && $bfbDatas['ajax_echo'] ) ) {
+				return $echo_html;
+			} elseif ( empty( $this->{'bfb_optId_' . $bfbDatas['device']} ) ) {
+					// ABテストでは出力しない
+					// キャッシュによりABできないため
+					// Ajaxで取得→出力
+					echo $echo_html;
+			}
 		}
 	}
 

@@ -187,7 +187,7 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 
 			<div class="bfb_preview_pc">
 
-				<?php if( $pagenow == 'admin.php' || $pagenow == 'term.php' ): ?>
+				<?php if( $pagenow == 'admin.php' || $pagenow == 'term.php' || $pagenow == 'post.php' ): ?>
 					<h2>PCのプレビュー</h2>
 				<?php endif; ?>
 
@@ -199,7 +199,7 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 
 			<div class="bfb_preview_sp">
 
-				<?php if( $pagenow == 'admin.php' || $pagenow == 'term.php' ): ?>
+				<?php if( $pagenow == 'admin.php' || $pagenow == 'term.php' || $pagenow == 'post.php'): ?>
 					<h2>スマホのプレビュー</h2>
 				<?php endif; ?>
 

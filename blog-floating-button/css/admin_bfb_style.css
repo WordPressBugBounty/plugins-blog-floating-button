@@ -136,6 +136,8 @@ body.term-php #edittag table.form-table{
     padding: 12px 10px 10px 17px;
     line-height: 1.8;
     background-color: #f3f3f3;
+	color: #1d2327!important;
+	font-weight: bold;
 }
 #bfb_wrap h2::before{
 	position: absolute;

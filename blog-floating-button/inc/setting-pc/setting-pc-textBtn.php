@@ -7,7 +7,6 @@
 ?>
 
 <div id="tabs-pc-textBtn">
-
 	<?php if( $this->is_activation ): ?>
 		<div class="bfb_load_preview_wrap"><a href="javascript:void(0)" class="bfb_load_preview">プレビュー更新</a></div>
 	<?php endif; ?>
