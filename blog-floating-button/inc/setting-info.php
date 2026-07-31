@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <h2>プラグインの情報</h2>
 
 <div class="bfb_box">
@@ -14,11 +19,21 @@
 	$output .= $li . 'サイトURL ： ' . site_url().$eol;
 	$output .= $li . 'WordPressバージョン ： ' . get_bloginfo('version').$eol;
 	$output .= $li . 'PHPバージョン ： ' . phpversion().$eol;
-	if (isset($_SERVER['HTTP_USER_AGENT']))	$output .= $li . 'ブラウザ ： ' . $_SERVER['HTTP_USER_AGENT'].$eol;
-	if (isset($_SERVER['SERVER_SOFTWARE']))	$output .= $li . 'サーバーソフト ： ' . $_SERVER['SERVER_SOFTWARE'].$eol;
-	if (isset($_SERVER['SERVER_PROTOCOL']))	$output .= $li . 'サーバープロトコル ： ' . $_SERVER['SERVER_PROTOCOL'].$eol;
-	if (isset($_SERVER['HTTP_ACCEPT_ENCODING']))	$output .= $li . 'エンコーディング ： ' . $_SERVER['HTTP_ACCEPT_ENCODING'].$eol;
-	if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))	$output .= $li . '言語 ： ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'].$eol;
+	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+		$output .= $li . 'ブラウザ ： ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) . $eol;
+	}
+	if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
+		$output .= $li . 'サーバーソフト ： ' . sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) . $eol;
+	}
+	if ( isset( $_SERVER['SERVER_PROTOCOL'] ) ) {
+		$output .= $li . 'サーバープロトコル ： ' . sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ) ) . $eol;
+	}
+	if ( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) {
+		$output .= $li . 'エンコーディング ： ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) . $eol;
+	}
+	if ( isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
+		$output .= $li . '言語 ： ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) . $eol;
+	}
 	$output .= $li . 'ホームページを固定ページにしている場合のID ： ' . get_option('page_on_front').$eol;
 	//利用中のプラグイン
 	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -162,6 +177,6 @@
 	} 
 
 	?>
-<pre style="white-space: pre-wrap;"><?php echo $output; ?></pre>
+<pre style="white-space: pre-wrap;"><?php echo esc_html( $output ); ?></pre>
 
 </div><!--bfb_box-->

@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <h2>BFB詳細設定(PRO版)</h2>
 
 <div class="bfb_box">

@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $table_html = '';
 $get_optimize_id = filter_input(INPUT_GET, 'optimize_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
@@ -21,8 +25,15 @@ if( !empty($get_optimize_id) && $this->is_validate($get_optimize_id,'opt_id') ){
 			$start_date = '2020-01';
 			$optData = $this->get_tableData($start_date,'',$opt_id);
 
-			$table_html .= "<tr><td><a href=\"?page=blog-floating-button-optimize-report&optimize_id=".$opt_id."\">".$optData['optimize_name']."</a></td><td>".$optData['device']."</td><td>".($optData['main_access']+$optData['sub_access'])."</td><td>".$optData['main_click']."(".$optData['main_clickRate']."%)</td><td>".$optData['sub_click']."(".$optData['sub_clickRate']."%)</td><td>".$optData['created_date']."</td><td>".$optData['finished_date']."</td></tr>";
-
+			$table_html .= '<tr>';
+			$table_html .= '<td><a href="' . esc_url( '?page=blog-floating-button-optimize-report&optimize_id=' . $opt_id ) . '">' . esc_html( $optData['optimize_name'] ) . '</a></td>';
+			$table_html .= '<td>' . esc_html( $optData['device'] ) . '</td>';
+			$table_html .= '<td>' . esc_html( intval( $optData['main_access'] ) + intval( $optData['sub_access'] ) ) . '</td>';
+			$table_html .= '<td>' . esc_html( intval( $optData['main_click'] ) ) . '(' . esc_html( $optData['main_clickRate'] ) . '%)</td>';
+			$table_html .= '<td>' . esc_html( intval( $optData['sub_click'] ) ) . '(' . esc_html( $optData['sub_clickRate'] ) . '%)</td>';
+			$table_html .= '<td>' . esc_html( $optData['created_date'] ) . '</td>';
+			$table_html .= '<td>' . esc_html( $optData['finished_date'] ) . '</td>';
+			$table_html .= '</tr>';
 		}
 	}
 }
@@ -33,7 +44,7 @@ if( !empty($get_optimize_id) && $this->is_validate($get_optimize_id,'opt_id') ){
 
 <?php if( !empty($optimize_id) ): ?>
 
-	<h1 class="bfb_h1">「<?php echo $optData['optimize_name']; ?>」のA/Bテストの詳細</h1>
+	<h1 class="bfb_h1">「<?php echo esc_html( $optData['optimize_name'] ); ?>」のA/Bテストの詳細</h1>
 
 	<?php 
 
@@ -80,7 +91,16 @@ if( !empty($get_optimize_id) && $this->is_validate($get_optimize_id,'opt_id') ){
 			$click_subNum_sum += $click_subNum;
 			$click_subRate = $this->report->calc_click_rate($access_subNum,$click_subNum);
 
-			$table_html = "<tr><td>$today</td><td>$access_entireNum</td><td>$click_mainNum($click_mainRate%)</td><td>$click_subNum($click_subRate%)</td></tr>$table_html";
+			$table_html = sprintf(
+				'<tr><td>%1$s</td><td>%2$s</td><td>%3$s(%4$s%%)</td><td>%5$s(%6$s%%)</td></tr>%7$s',
+				esc_html( $today ),
+				esc_html( intval( $access_entireNum ) ),
+				esc_html( intval( $click_mainNum ) ),
+				esc_html( $click_mainRate ),
+				esc_html( intval( $click_subNum ) ),
+				esc_html( $click_subRate ),
+				$table_html
+			);
 
 			$optData['main_maxClickRate'][] = $click_mainRate;
 			$optData['sub_maxClickRate'][] = $click_subRate;
@@ -97,7 +117,14 @@ if( !empty($get_optimize_id) && $this->is_validate($get_optimize_id,'opt_id') ){
 		}else{
 			$click_subRate_sum = 0;
 		}
-		$table_html .= "<tr class='bold red'><td>合計</td><td>$access_num_sum</td><td>$click_mainNum_sum($click_mainRate_sum%)</td><td>$click_subNum_sum($click_subRate_sum%)</td></tr>";
+		$table_html .= sprintf(
+			'<tr class="bold red"><td>合計</td><td>%1$s</td><td>%2$s(%3$s%%)</td><td>%4$s(%5$s%%)</td></tr>',
+			esc_html( intval( $access_num_sum ) ),
+			esc_html( intval( $click_mainNum_sum ) ),
+			esc_html( $click_mainRate_sum ),
+			esc_html( intval( $click_subNum_sum ) ),
+			esc_html( $click_subRate_sum )
+		);
 
 	}
 
@@ -119,7 +146,7 @@ if( !empty($get_optimize_id) && $this->is_validate($get_optimize_id,'opt_id') ){
 			<tr><th class="short_item">日付</th><th>合計ユーザー数</th><th>メインのクリック数(CTR)</th><th>サブのクリック数(CTR)</th></tr>
 		</thead>
 		<tbody>
-			<?php echo $table_html; ?>
+			<?php echo wp_kses_post( $table_html ); ?>
 		</tbody>
 	</table>
 
@@ -157,13 +184,13 @@ foreach( $preview_datas as $key => $opt_data ){
 
 	<div id="bfb_sub" class="bfb_pro">
 		<div class="preview_wrap">
-			<div class="bfb_preview_<?php echo $device; ?>">
+			<div class="bfb_preview_<?php echo esc_attr( $device ); ?>">
 				<h2>メインのプレビュー</h2>
 				<div class="preview_area">
 					<iframe srcdoc='<?php $this->generate_btn_html($device,$mainBtnData); ?>'></iframe>
 				</div>
 			</div>
-			<div class="bfb_preview_<?php echo $device; ?>">
+			<div class="bfb_preview_<?php echo esc_attr( $device ); ?>">
 				<h2>サブのプレビュー</h2>
 				<div class="preview_area">
 					<iframe srcdoc='<?php $this->generate_btn_html($device,$subBtnData); ?>'></iframe>
@@ -178,7 +205,7 @@ foreach( $preview_datas as $key => $opt_data ){
 
 	<table class="table th_yellow">
 		<tr><th>テスト名</th><th>対象デバイス</th><th>合計ユーザー数</th><th>メインのクリック数(CTR)</th><th>サブのクリック数(CTR)</th><th>作成日</th><th>終了日</th></tr>
-		<?php echo $table_html; ?>
+		<?php echo wp_kses_post( $table_html ); ?>
 	</table>
 
 <?php endif; ?>

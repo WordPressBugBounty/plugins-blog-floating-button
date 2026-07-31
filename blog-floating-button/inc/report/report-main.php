@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $report_type = $this->bfb_get_data('report_type','get');
 $start_date = $this->bfb_get_data('start_date','get');
 $end_date = $this->bfb_get_data('end_date','get');

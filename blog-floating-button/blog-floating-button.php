@@ -3,7 +3,7 @@
 Plugin Name: Blog Floating Button
 Plugin URI: https://bfb-plugin.com/
 Description: 「Blog Floating Button(BFB)」はブログ内にフロートボタンを簡単に実装できるプラグインです。
-Version: 1.4.20
+Version: 1.4.21
 Author: Meril Inc.
 Author URI: https://meril.co.jp/
 License: GPL2
@@ -11,9 +11,11 @@ License: GPL2
 ?>
 <?php
 
-if ( strpos( $_SERVER['HTTP_HOST'], 'dev.' ) !== false ) {
-	error_reporting( E_ALL );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
+
+define( 'BFB_PLUGIN_VERSION', '1.4.21' );
 
 #[AllowDynamicProperties] // PHP8.2対応
 class BlogFloatingButton {
@@ -174,6 +176,7 @@ class BlogFloatingButton {
 	public function insertFooter( $device = null ) {
 
 		// エラー処理を追加 v1.4.20
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- SCSSコンパイル中の警告を抑止する目的。全ての return 前で restore_error_handler() により復元している
 		set_error_handler(
 			function ( $errno, $errstr, $errfile, $errline ) {
 				// すべてのエラーを無視する
@@ -190,6 +193,7 @@ class BlogFloatingButton {
 			$cookie_bfb_closed = $cookie_bfb_closed !== null ? htmlspecialchars( $cookie_bfb_closed, ENT_QUOTES, 'UTF-8' ) : '';
 
 			if ( $cookie_bfb_closed == 'true' ) {
+				restore_error_handler();
 				return false;
 			}
 		}
@@ -200,6 +204,7 @@ class BlogFloatingButton {
 		// 管理者のみ表示
 		if ( $this->get_metadata( 'bfb_mode' ) != 'open' ) {
 			if ( ! current_user_can( 'manage_options' ) ) {
+				restore_error_handler();
 				return false;
 			}
 		}
@@ -208,6 +213,7 @@ class BlogFloatingButton {
 		// 管理画面では非表示にならない
 		if ( isset( $this->bfb_exclude_toppage ) && $this->bfb_exclude_toppage === 'show_top_only' && is_singular() ) {
 			if ( ! is_home() && ! is_front_page() ) {
+				restore_error_handler();
 				return '';
 			}
 		}
@@ -215,6 +221,7 @@ class BlogFloatingButton {
 		// トップページの表示/非表示
 		if ( is_home() || is_front_page() ) {
 			if ( isset( $this->bfb_exclude_toppage ) && $this->bfb_exclude_toppage === 'hide' ) {
+				restore_error_handler();
 				return '';
 			}
 		} else {
@@ -225,6 +232,7 @@ class BlogFloatingButton {
 				$bfb_exclude_post_ids = explode( ',', $this->bfb_exclude_post_ids );
 				if ( count( $bfb_exclude_post_ids ) > 0 && isset( $post->ID ) ) {
 					if ( in_array( strval( $post->ID ), $bfb_exclude_post_ids, true ) ) {
+						restore_error_handler();
 						return '';
 					}
 				}
@@ -287,7 +295,9 @@ class BlogFloatingButton {
 
 		// 管理画面はスクリプトは表示しない
 		if ( is_admin() ) {
-			return ''; }
+			restore_error_handler();
+			return '';
+		}
 
 		if ( empty( $this->bfb_cookie_hide_span ) ) {
 			$bfb_cookie_hide_span = 7;
@@ -321,6 +331,7 @@ class BlogFloatingButton {
 		}
 
 		// jsの内容を大幅変更 (v1.4.17)
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- スクリプト本体は固定で、動的な数値は wp_json_encode() 済み
 		echo $this->delete_br(
 			'
 <script type="text/javascript">
@@ -332,9 +343,9 @@ jQuery(function($){
 		var scrollTop = 0;
 		var bfb_show_pos = 0;
 		var bfb_hide_pos = 99999999;
-		var bfb_showing_area = ' . $bfb_showing_area . ';
-		var is_autohide = ' . $js_is_autohide . ';
-		var is_pro = ' . $js_is_pro . ';
+		var bfb_showing_area = ' . wp_json_encode( (int) $bfb_showing_area ) . ';
+		var is_autohide = ' . wp_json_encode( (int) $js_is_autohide ) . ';
+		var is_pro = ' . wp_json_encode( (int) $js_is_pro ) . ';
 		var has_show_pos = 0;
 		var has_hide_pos = 0;
 		
@@ -421,6 +432,7 @@ jQuery(function($){
 '
 		);
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- スクリプト本体は固定で、動的な数値は wp_json_encode() 済み
 		echo $this->delete_br(
 			'
 
@@ -429,7 +441,7 @@ jQuery(function($){
 
 	$(document).on(\'click touchend\',\'[id^="bfb_content_"] .bfb_closed\',function(){
 	    $(\'[id^="bfb_content_"]\').html("");
-		$.cookie("bfb_closed", "true", { expires: ' . esc_html( $bfb_cookie_hide_span ) . ' });
+		$.cookie("bfb_closed", "true", { expires: ' . wp_json_encode( (int) $bfb_cookie_hide_span ) . ' });
 	});
 
 });
@@ -441,12 +453,6 @@ jQuery(function($){
 		// 最適化テスト中
 		if ( ! empty( $this->{'bfb_optId_pc'} ) || ! empty( $this->{'bfb_optId_sp'} ) ) {
 
-			$ajax_page_type = '';
-			if ( is_singular() ) {
-				// 個別記事、固定ページ
-				$ajax_page_type = '"page_type": "single",';
-			}
-
 			foreach ( $this->devices as $device ) {
 
 				// 初期化
@@ -456,41 +462,49 @@ jQuery(function($){
 					// 最適化テストではキャッシュ対策のためajaxで出力
 
 					// [bfb_show]があれば初期表示しない
-					if ( ! $this->is_bfb_show() ) {
-						$bfb_display_ajax = '$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});';
-					} else {
-						$bfb_display_ajax = '';
-					}
+					$bfb_display_ajax = ! $this->is_bfb_show();
 
 					$this->{'optimize_type_' . $device} = $this->optDatas['optimizeBtn']; // tracking_js.phpで使用
 
+					$ajax_data = array(
+						'device'       => $device,
+						'post_id'      => isset( $post->ID ) ? (int) $post->ID : 0,
+						'optimize_id'  => $this->{'bfb_optId_' . $device},
+						'optimizeBtn'  => $this->{'optimize_type_' . $device},
+					);
+					if ( is_singular() ) {
+						// 個別記事、固定ページ
+						$ajax_data['page_type'] = 'single';
+					}
+
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- スクリプト本体は固定で、動的な値は wp_json_encode() 済み
 					echo $this->delete_br(
 						'<script type="text/javascript">
 						jQuery(function($){
+							var bfbDevice = ' . wp_json_encode( $device, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';
+							var bfbDisplayAjax = ' . wp_json_encode( $bfb_display_ajax ) . ';
 							try{
 						        jQuery.ajax({
-						            url: "' . site_url( $this->echo_bfb_optimize_url ) . '",
+						            url: ' . wp_json_encode( site_url( $this->echo_bfb_optimize_url ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ',
 						            type: "post",
-						            data: {
-						                "device": "' . $device . '",
-						                "post_id": ' . $post->ID . ','
-										. $ajax_page_type . '
-						                "optimize_id": "' . $this->{'bfb_optId_' . $device} . '",
-						                "optimizeBtn": "' . $this->{'optimize_type_' . $device} . '",
-						            },
+						            data: ' . wp_json_encode( $ajax_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ',
 						        }).done(function(res){
-		    						if(  "' . $device . '" == "sp" ){
+									if( bfbDevice === "sp" ){
 										/*SPはPCを待機して表示*/
 										var is_bfb_sp_show = setInterval(function(){
 											if( jQuery(\'[id^="bfb_content_pc"]\').length ){
 												jQuery("body").append(res);
-						        				' . $bfb_display_ajax . '
+												if ( bfbDisplayAjax ) {
+													$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+												}
 												clearInterval(is_bfb_sp_show);
 											}
 										}, 1000);
 									}else{
 										jQuery("body").append(res);
-						        		' . $bfb_display_ajax . '
+										if ( bfbDisplayAjax ) {
+											$(\'[id^="bfb_content_"]\').css({"cssText": "display: block;"});
+										}
 									}
 						        }).fail(function(res){
 						        }).always(function(res){
@@ -717,7 +731,7 @@ jQuery(function($){
 			$distribution_rate = $this->optDatas['distribution_rate'];
 
 			// 振り分け率：70なら70%でメインボタン
-			$opt_rand = mt_rand( 0, 100 );
+			$opt_rand = wp_rand( 0, 100 );
 			if ( $opt_rand < $distribution_rate ) {
 				$this->optDatas['optimizeBtn']     = 'mainBtnDesign';
 				$this->optDatas['suf_optimizeBtn'] = '_opt_mainBtn';
@@ -938,8 +952,10 @@ jQuery(function($){
 			$current_screen = get_current_screen();
 			// ABテスト結果画面ではABテスト実行中でもメッセージは出さずプレビューを出力する
 			if ( $current_screen && $current_screen->id === 'blog-floating-button_page_blog-floating-button-optimize-report' ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $echo_html は各値をコンテキスト別にエスケープ済みで、許可対象外の style/SVG/カスタム属性を含む生成済みマークアップ
 				echo $echo_html;
 			} elseif ( $admin_pro_flg && empty( $this->{'bfb_optId_' . $device} ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $echo_html は各値をコンテキスト別にエスケープ済みで、許可対象外の style/SVG/カスタム属性を含む生成済みマークアップ
 				echo $echo_html;
 			} else {
 				echo wp_kses_post( $this->abtest_message );
@@ -950,6 +966,7 @@ jQuery(function($){
 				// ABテストでは出力しない
 				// キャッシュによりABできないため
 				// Ajaxで取得→出力
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $echo_html は各値をコンテキスト別にエスケープ済みで、許可対象外の style/SVG/カスタム属性を含む生成済みマークアップ
 				echo $echo_html;
 		}
 	}
@@ -992,7 +1009,7 @@ jQuery(function($){
 			'MediaUpLoader',
 			plugins_url( 'js/bfb_admin.js', __FILE__ ),
 			array( 'jquery' ),
-			false,
+			BFB_PLUGIN_VERSION,
 			true
 		);
 		wp_enqueue_media();
@@ -1035,6 +1052,7 @@ jQuery(function($){
 	// 設定保存
 	public function save_metadata() {
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- 直後の check_admin_referer() で検証している。nonce値自体を $_POST から取るため存在チェックが先行するのは避けられない
 		if ( ! $_POST ) {
 			return false; }
 
@@ -1265,7 +1283,8 @@ jQuery(function($){
 			'webmate',
 		);
 		$pattern    = '/' . implode( '|', $useragents ) . '/i';
-		return preg_match( $pattern, $_SERVER['HTTP_USER_AGENT'] );
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+		return preg_match( $pattern, $user_agent );
 	}
 
 	// 更新メッセージ
@@ -1274,7 +1293,7 @@ jQuery(function($){
 	}
 	// エラーメッセージ
 	public function error_message( $msg ) {
-		echo '<div id="setting-error-settings_updated" class="error settings-error notice bfb_notice is-dismissible"><p><strong>' . $msg . '</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">この通知を非表示にする</span></button></div>';
+		echo '<div id="setting-error-settings_updated" class="error settings-error notice bfb_notice is-dismissible"><p><strong>' . esc_html( $msg ) . '</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">この通知を非表示にする</span></button></div>';
 	}
 	// PRO版ライセンスキーのチェック
 	public function check_license_key() {
@@ -1356,7 +1375,9 @@ jQuery(function($){
 		}
 
 		// 現在のURL
-		$url = empty( $_SERVER['HTTPS'] ) ? 'http://' : 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		$http_host   = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$url         = empty( $_SERVER['HTTPS'] ) ? 'http://' : esc_url_raw( 'https://' . $http_host . $request_uri );
 
 		$data = array(
 			'body' => array(

@@ -1,4 +1,8 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 	if( isset($this->optimize_step) ){
 		$optimize_step = '_'.$this->optimize_step;
 	}else{
@@ -25,22 +29,22 @@
 				$lt_sp = '';
 				switch( $this->{'bfb_imgBanner_bfbPos_sp'.$optimize_step} ){
 					case "rt":
-						$rt_sp = 'selected="selected"';
+						$rt_sp = 'selected';
 						break;
 					case "rb":
-						$rb_sp = 'selected="selected"';
+						$rb_sp = 'selected';
 						break;
 					case "lb":
-						$lb_sp = 'selected="selected"';
+						$lb_sp = 'selected';
 						break;
 					case "lt":
-						$lt_sp = 'selected="selected"';
+						$lt_sp = 'selected';
 						break;
 				}
 			?>
 			<select name="bfb_imgBanner_bfbPos_sp">
-				<option value="rt" <?php echo $rt_sp; ?>>画面上</option>
-				<option value="rb" <?php echo $rb_sp; ?>>画面下</option>
+				<option value="rt" <?php echo esc_attr( $rt_sp ); ?>>画面上</option>
+				<option value="rb" <?php echo esc_attr( $rb_sp ); ?>>画面下</option>
 			</select>
 		</td>
 	</tr>
@@ -66,12 +70,12 @@
 			<?php
 				$linktarget_sp_blank = '';
 				if( $this->{'bfb_imgBanner_linkTarget_sp'.$optimize_step} == "blank" ){
-					$linktarget_sp_blank = 'selected="selected"';
+					$linktarget_sp_blank = 'selected';
 				}
 			?>
 			<select name="bfb_imgBanner_linkTarget_sp">
 				<option value="self">同じタブ</option>
-				<option value="blank" <?php echo $linktarget_sp_blank; ?>>別のタブ</option>
+				<option value="blank" <?php echo esc_attr( $linktarget_sp_blank ); ?>>別のタブ</option>
 			</select>
 		</td>
 	</tr>
@@ -82,12 +86,12 @@
 			<?php
 				$imgBanner_linkRel_sp_nofollow = '';
 				if( $this->{'bfb_imgBanner_linkRel_sp'.$optimize_step} == "nofollow" ){
-					$imgBanner_linkRel_sp_nofollow = 'selected="selected"';
+					$imgBanner_linkRel_sp_nofollow = 'selected';
 				}
 			?>
 			<select name="bfb_imgBanner_linkRel_sp">
 				<option value="">付与しない</option>
-				<option value="nofollow" <?php echo $imgBanner_linkRel_sp_nofollow; ?>>nofollow</option>
+				<option value="nofollow" <?php echo esc_attr( $imgBanner_linkRel_sp_nofollow ); ?>>nofollow</option>
 			</select>
 		</td>
 	</tr>

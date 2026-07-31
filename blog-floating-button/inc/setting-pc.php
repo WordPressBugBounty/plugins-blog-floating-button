@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <ul>
 	<li><a href="#tabs-pc-textBtn">ボタン単体</a></li>
 	<li><a href="#tabs-pc-textTextBtn">説明文+ボタン</a></li>

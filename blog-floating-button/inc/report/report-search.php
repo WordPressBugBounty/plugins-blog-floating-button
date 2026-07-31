@@ -1,9 +1,14 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <form action="" method="get" class="search_box">
 	<table>
 		<tr>
 			<th>レポート種類</th>
 			<td>
-				<label for="daily_report"><input type="radio" id="daily_report" name="report_type" class="" value="daily_report" <?= $report_type=='daily_report' ? 'checked' : '' ?>>日別</label><label for="monthly_report"><input type="radio" id="monthly_report" name="report_type" class="" value="monthly_report" <?= $report_type=='monthly_report' ? 'checked' : '' ?>>月別</label><label for="access_detail_report"><input type="radio" id="access_detail_report" name="report_type" class="" value="access_detail_report" <?= $report_type=='access_detail_report' ? 'checked' : '' ?>>アクセス詳細</label><label for="click_detail_report"><input type="radio" id="click_detail_report" name="report_type" class="" value="click_detail_report" <?= $report_type=='click_detail_report' ? 'checked' : '' ?>>クリック詳細</label>
+				<label for="daily_report"><input type="radio" id="daily_report" name="report_type" class="" value="daily_report" <?php checked( $report_type, 'daily_report' ); ?>>日別</label><label for="monthly_report"><input type="radio" id="monthly_report" name="report_type" class="" value="monthly_report" <?php checked( $report_type, 'monthly_report' ); ?>>月別</label><label for="access_detail_report"><input type="radio" id="access_detail_report" name="report_type" class="" value="access_detail_report" <?php checked( $report_type, 'access_detail_report' ); ?>>アクセス詳細</label><label for="click_detail_report"><input type="radio" id="click_detail_report" name="report_type" class="" value="click_detail_report" <?php checked( $report_type, 'click_detail_report' ); ?>>クリック詳細</label>
 			</td>
 		</tr>
 		<tr>
@@ -21,8 +26,8 @@
 		<tr>
 			<th>デバイス</th>
 			<td>
-				<label for="all"><input type="radio" id="all" name="device" class="" value="" <?= $device=='' ? 'checked' : '' ?>>全て</label>
-				<label for="PC"><input type="radio" id="PC" name="device" class="" value="PC" <?= $device=='PC' ? 'checked' : '' ?>>PC</label><label for="SP"><input type="radio" id="SP" name="device" class="" value="SP" <?= $device=='SP' ? 'checked' : '' ?>>スマホ</label><label for="Tab"><input type="radio" id="Tab" name="device" class="" value="Tab" <?= $device=='Tab' ? 'checked' : '' ?>>タブレット</label><label for="Mobile"><input type="radio" id="Mobile" name="device" class="" value="Mobile" <?= $report_type=='Mobile' ? 'checked' : '' ?>>モバイル</label>
+				<label for="all"><input type="radio" id="all" name="device" class="" value="" <?php checked( $device, '' ); ?>>全て</label>
+				<label for="PC"><input type="radio" id="PC" name="device" class="" value="PC" <?php checked( $device, 'PC' ); ?>>PC</label><label for="SP"><input type="radio" id="SP" name="device" class="" value="SP" <?php checked( $device, 'SP' ); ?>>スマホ</label><label for="Tab"><input type="radio" id="Tab" name="device" class="" value="Tab" <?php checked( $device, 'Tab' ); ?>>タブレット</label><label for="Mobile"><input type="radio" id="Mobile" name="device" class="" value="Mobile" <?php checked( $report_type, 'Mobile' ); ?>>モバイル</label>
 			</td>
 		</tr>
 		<tr class="bfb_memo" style="display: none;">

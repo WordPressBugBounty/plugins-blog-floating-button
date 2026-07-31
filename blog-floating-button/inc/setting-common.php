@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <h2>共通の設定</h2>
 
 <div class="bfb_box">
@@ -10,7 +15,7 @@
 				<?php
 					$bfb_mode_open = '';
 					if( $this->bfb_mode == "open" ){
-						$bfb_mode_open = 'selected="selected"';
+						$bfb_mode_open = 'selected';
 					}
 				?>
 				<select name="bfb_mode">
@@ -30,28 +35,28 @@
 					$bfb_designType_pc_none = '';
 					switch( $this->bfb_designType_pc ){
 						case "textBtn":
-							$bfb_designType_pc_textBtn = 'selected="selected"';
+							$bfb_designType_pc_textBtn = 'selected';
 							break;
 						case "textTextBtn":
-							$bfb_designType_pc_textTextBtn = 'selected="selected"';
+							$bfb_designType_pc_textTextBtn = 'selected';
 							break;
 						case "textBtnTextBtn":
-							$bfb_designType_pc_textBtnTextBtn = 'selected="selected"';
+							$bfb_designType_pc_textBtnTextBtn = 'selected';
 							break;
 						case "imgBanner":
-							$bfb_designType_pc_imgBanner = 'selected="selected"';
+							$bfb_designType_pc_imgBanner = 'selected';
 							break;
 						case "none":
-							$bfb_designType_pc_none = 'selected="selected"';
+							$bfb_designType_pc_none = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_designType_pc">
-					<option value="textBtn" <?php echo $bfb_designType_pc_textBtn; ?>>ボタンのみ</option>
-					<option value="textTextBtn" <?php echo $bfb_designType_pc_textTextBtn; ?>>説明文+ボタン</option>
-					<option value="textBtnTextBtn" <?php echo $bfb_designType_pc_textBtnTextBtn; ?>>ボタン+ボタン</option>
-					<option value="imgBanner" <?php echo $bfb_designType_pc_imgBanner; ?>>バナー画像</option>
-					<option value="none" <?php echo $bfb_designType_pc_none; ?>>表示しない</option>
+					<option value="textBtn" <?php echo esc_attr( $bfb_designType_pc_textBtn ); ?>>ボタンのみ</option>
+					<option value="textTextBtn" <?php echo esc_attr( $bfb_designType_pc_textTextBtn ); ?>>説明文+ボタン</option>
+					<option value="textBtnTextBtn" <?php echo esc_attr( $bfb_designType_pc_textBtnTextBtn ); ?>>ボタン+ボタン</option>
+					<option value="imgBanner" <?php echo esc_attr( $bfb_designType_pc_imgBanner ); ?>>バナー画像</option>
+					<option value="none" <?php echo esc_attr( $bfb_designType_pc_none ); ?>>表示しない</option>
 				</select>
 			</td>
 		</tr>
@@ -66,28 +71,28 @@
 					$bfb_designType_sp_none = '';
 					switch( $this->bfb_designType_sp ){
 						case "textBtn":
-							$bfb_designType_sp_textBtn = 'selected="selected"';
+							$bfb_designType_sp_textBtn = 'selected';
 							break;
 						case "textTextBtn":
-							$bfb_designType_sp_textTextBtn = 'selected="selected"';
+							$bfb_designType_sp_textTextBtn = 'selected';
 							break;
 						case "textBtnTextBtn":
-							$bfb_designType_sp_textBtnTextBtn = 'selected="selected"';
+							$bfb_designType_sp_textBtnTextBtn = 'selected';
 							break;
 						case "imgBanner":
-							$bfb_designType_sp_imgBanner = 'selected="selected"';
+							$bfb_designType_sp_imgBanner = 'selected';
 							break;
 						case "none":
-							$bfb_designType_sp_none = 'selected="selected"';
+							$bfb_designType_sp_none = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_designType_sp">
-					<option value="textBtn" <?php echo $bfb_designType_sp_textBtn; ?>>ボタンのみ</option>
-					<option value="textTextBtn" <?php echo $bfb_designType_sp_textTextBtn; ?>>説明文+ボタン</option>
-					<option value="textBtnTextBtn" <?php echo $bfb_designType_sp_textBtnTextBtn; ?>>ボタン+ボタン</option>
-					<option value="imgBanner" <?php echo $bfb_designType_sp_imgBanner; ?>>バナー画像</option>
-					<option value="none" <?php echo $bfb_designType_sp_none; ?>>表示しない</option>
+					<option value="textBtn" <?php echo esc_attr( $bfb_designType_sp_textBtn ); ?>>ボタンのみ</option>
+					<option value="textTextBtn" <?php echo esc_attr( $bfb_designType_sp_textTextBtn ); ?>>説明文+ボタン</option>
+					<option value="textBtnTextBtn" <?php echo esc_attr( $bfb_designType_sp_textBtnTextBtn ); ?>>ボタン+ボタン</option>
+					<option value="imgBanner" <?php echo esc_attr( $bfb_designType_sp_imgBanner ); ?>>バナー画像</option>
+					<option value="none" <?php echo esc_attr( $bfb_designType_sp_none ); ?>>表示しない</option>
 				</select>
 			</td>
 		</tr>
@@ -98,15 +103,15 @@
 					$bfb_exclude_toppage_hide = '';
 					$bfb_exclude_toppage_show_top_only = '';
 					if( $this->bfb_exclude_toppage == "hide" ){
-						$bfb_exclude_toppage_hide = 'selected="selected"';
+						$bfb_exclude_toppage_hide = 'selected';
 					}elseif( $this->bfb_exclude_toppage == "show_top_only" ){
-						$bfb_exclude_toppage_show_top_only = 'selected="selected"';
+						$bfb_exclude_toppage_show_top_only = 'selected';
 					}
 				?>
 				<select name="bfb_exclude_toppage">
 					<option value="show">表示</option>
-					<option value="show_top_only" <?php echo $bfb_exclude_toppage_show_top_only; ?>>トップページのみ表示</option>
-					<option value="hide" <?php echo $bfb_exclude_toppage_hide; ?>>トップページのみ非表示</option>
+					<option value="show_top_only" <?php echo esc_attr( $bfb_exclude_toppage_show_top_only ); ?>>トップページのみ表示</option>
+					<option value="hide" <?php echo esc_attr( $bfb_exclude_toppage_hide ); ?>>トップページのみ非表示</option>
 				</select>
 			</td>
 		</tr>
@@ -136,11 +141,11 @@
 
 			?>
 			<td>
-				<label for="category"><input type="checkbox" id="category" name="bfb_hidden_pages[]" value="category" <?php echo $bfb_hidden_pages_category; ?>>カテゴリーページ</label>
-				<label for="tag"><input type="checkbox" id="tag" name="bfb_hidden_pages[]" value="tag" <?php echo $bfb_hidden_pages_tag; ?>>タグページ</label>
-				<label for="search"><input type="checkbox" id="search" name="bfb_hidden_pages[]" value="search" <?php echo $bfb_hidden_pages_search; ?>>検索結果ページ</label>
-				<label for="author"><input type="checkbox" id="author" name="bfb_hidden_pages[]" value="author" <?php echo $bfb_hidden_pages_author; ?>>投稿者アーカイブページ</label>
-				<label for="404"><input type="checkbox" id="404" name="bfb_hidden_pages[]" value="404" <?php echo $bfb_hidden_pages_404; ?>>404ページ</label>
+				<label for="category"><input type="checkbox" id="category" name="bfb_hidden_pages[]" value="category" <?php echo esc_attr( $bfb_hidden_pages_category ); ?>>カテゴリーページ</label>
+				<label for="tag"><input type="checkbox" id="tag" name="bfb_hidden_pages[]" value="tag" <?php echo esc_attr( $bfb_hidden_pages_tag ); ?>>タグページ</label>
+				<label for="search"><input type="checkbox" id="search" name="bfb_hidden_pages[]" value="search" <?php echo esc_attr( $bfb_hidden_pages_search ); ?>>検索結果ページ</label>
+				<label for="author"><input type="checkbox" id="author" name="bfb_hidden_pages[]" value="author" <?php echo esc_attr( $bfb_hidden_pages_author ); ?>>投稿者アーカイブページ</label>
+				<label for="404"><input type="checkbox" id="404" name="bfb_hidden_pages[]" value="404" <?php echo esc_attr( $bfb_hidden_pages_404 ); ?>>404ページ</label>
 			</td>
 		</tr>
 		<?php endif; ?>
@@ -150,12 +155,12 @@
 				<?php
 					$bfb_autohide_off = '';
 					if( $this->bfb_autohide == "off" ){
-						$bfb_autohide_off = 'selected="selected"';
+						$bfb_autohide_off = 'selected';
 					}
 				?>
 				<select name="bfb_autohide">
 					<option value="on">下スクロール時は非表示</option>
-					<option value="off" <?php echo $bfb_autohide_off; ?>>常に表示</option>
+					<option value="off" <?php echo esc_attr( $bfb_autohide_off ); ?>>常に表示</option>
 				</select>
 			</td>
 		</tr>
@@ -209,12 +214,12 @@
 				<?php
 					$bfb_clickAnalyze_off = '';
 					if( $this->bfb_clickAnalyze == "off" ){
-						$bfb_clickAnalyze_off = 'selected="selected"';
+						$bfb_clickAnalyze_off = 'selected';
 					}
 				?>
 				<select name="bfb_clickAnalyze">
 					<option value="on">計測する</option>
-					<option value="off" <?php echo $bfb_clickAnalyze_off; ?>>計測しない</option>
+					<option value="off" <?php echo esc_attr( $bfb_clickAnalyze_off ); ?>>計測しない</option>
 				</select>
 			</td>
 		</tr>
@@ -224,12 +229,12 @@
 				<?php
 					$bfb_clickAnalyze_exclude_admin_off = '';
 					if( $this->bfb_clickAnalyze_exclude_admin == "off" ){
-						$bfb_clickAnalyze_exclude_admin_off = 'selected="selected"';
+						$bfb_clickAnalyze_exclude_admin_off = 'selected';
 					}
 				?>
 				<select name="bfb_clickAnalyze_exclude_admin">
 					<option value="on">管理者を除外する</option>
-					<option value="off" <?php echo $bfb_clickAnalyze_exclude_admin_off; ?>>管理者を除外しない</option>
+					<option value="off" <?php echo esc_attr( $bfb_clickAnalyze_exclude_admin_off ); ?>>管理者を除外しない</option>
 				</select>
 			</td>
 		</tr>
@@ -243,7 +248,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'sp' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_pc==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';							
 							switch($optData['status']){
 								case 1:
@@ -256,13 +260,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_pc, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_pc">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -275,7 +289,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'pc' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_sp==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';
 							switch($optData['status']){
 								case 1:
@@ -288,13 +301,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_sp, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_sp">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -309,31 +332,31 @@
 				$bfb_retention_period_360 = '';
 				switch( $this->bfb_retention_period ){
 					case "period_0":
-						$bfb_retention_period_0 = 'selected="selected"';
+						$bfb_retention_period_0 = 'selected';
 						break;
 					case "period_30":
-						$bfb_retention_period_30 = 'selected="selected"';
+						$bfb_retention_period_30 = 'selected';
 						break;
 					case "period_90":
-						$bfb_retention_period_90 = 'selected="selected"';
+						$bfb_retention_period_90 = 'selected';
 						break;
 					case "period_180":
-						$bfb_retention_period_180 = 'selected="selected"';
+						$bfb_retention_period_180 = 'selected';
 						break;
 					case "period_360":
-						$bfb_retention_period_360 = 'selected="selected"';
+						$bfb_retention_period_360 = 'selected';
 						break;
 					default:
-						$bfb_retention_period_0 = 'selected="selected"';
+						$bfb_retention_period_0 = 'selected';
 				}
 			?>
 			<td>
 				<select name="bfb_retention_period">
-					<option value="period_0" <?php echo $bfb_retention_period_0; ?>>ずっと</option>
-					<option value="period_30" <?php echo $bfb_retention_period_30; ?>>30日</option>
-					<option value="period_90" <?php echo $bfb_retention_period_90; ?>>90日</option>
-					<option value="period_180" <?php echo $bfb_retention_period_180; ?>>180日</option>
-					<option value="period_360" <?php echo $bfb_retention_period_360; ?>>360日</option>
+					<option value="period_0" <?php echo esc_attr( $bfb_retention_period_0 ); ?>>ずっと</option>
+					<option value="period_30" <?php echo esc_attr( $bfb_retention_period_30 ); ?>>30日</option>
+					<option value="period_90" <?php echo esc_attr( $bfb_retention_period_90 ); ?>>90日</option>
+					<option value="period_180" <?php echo esc_attr( $bfb_retention_period_180 ); ?>>180日</option>
+					<option value="period_360" <?php echo esc_attr( $bfb_retention_period_360 ); ?>>360日</option>
 				</select>
 			</td>
 		</tr>

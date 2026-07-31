@@ -3,183 +3,197 @@ Contributors:1meril
 Donate link: https://bfb-plugin.com/
 Tags: announcement,banner,footer banner,floating banner,fixed banner
 Requires at least: WordPress 6.0
-Tested up to: WordPress 6.7.1
+Tested up to: 7.0
 Requires PHP: 8.2
-Stable tag: 1.4.20
+Stable tag: 1.4.21
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Blog Floating Button(BFB)は、ブログにフロートボタンを簡単に実装できるプラグインです。フロートボタンでキラーページに簡単に誘導することができるため、商品購入数や問い合わせ数の向上が期待できます。
+Blog Floating Button (BFB) adds customizable floating buttons to your WordPress site and directs visitors to key landing pages.
 
 == Description ==
 
-Blog Floating Button(BFB)は、ブログにフロートボタンを簡単に実装できるプラグインです。フロートボタンでキラーページに簡単に誘導することができるため、商品購入数や問い合わせ数の向上が期待できます。
+Blog Floating Button (BFB) makes it easy to add floating buttons to your WordPress site. Use them to guide visitors to landing pages, such as product or contact pages, and encourage purchases or inquiries.
 
-管理画面でフロートボタンのテキスト変更、ボタンデザイン(4パターン)やボタン色(5パターン)も自分で選ぶことができます。ブログのテーマカラーに合わせてクリック率の高いフロートボタンが自分の思い通りに作成できます。
+From the WordPress admin area, you can change the button text and choose from four button styles and five colors. This makes it easy to create a prominent floating button that matches your site's design.
 
-### 使い方
+### How to Use
 
-= 共通の設定 =
+= General Settings =
 
-フロートボタンの共通設定を行います。
-
-<ul>
-	<li>開発モード：「管理者のみを表示」を選択すると、フロートボタンは管理者としてログインしているユーザーにしか表示されません(初期設定時などに使用)。一般ユーザーにも表示したい場合「全体公開」を選択してください。</li>
-	<li>PCのボタンデザイン：PCでアクセスした時に表示されるボタンデザインです。</li>
-	<li>スマホのボタンデザイン：スマホでアクセスした時に表示されるボタンデザインです。</li>
-	<li>トップページの表示：トップページの表示方法を選択できます。</li>
-	<li>除外記事ID：設定した記事IDの記事ではフロートボタンが非表示になります。お問い合わせページなど、フロートボタンを表示したくない記事IDを設定してください。</li>
-	<li>自動非表示機能：ページをスクロールした時にフロートボタンを自動的に非表示にすることができます。「常に表示」を選択すると自動非表示はオフになります。</li>
-	<li>クリック計測の有効化：クリック計測を有効にするかどうかを選択できます。</li>
-	<li>クリック計測で管理者を除外：管理者としてログイン中のユーザーでクリック計測を有効にするかどうかを選択できます。正確にデータを取得するために、テスト時以外は除外することを推奨します。</li>
-	<li>PRO版ライセンスキー：有料のPRO版ライセンスキーを入力すると、機能制限を解除できます。</li>
-</ul>
-
-= ボタン設定 =
-
-各フロートボタンの個別設定を行います。
+Configure the settings shared by all floating buttons.
 
 <ul>
-	<li>ボタンタイプ：ボタン枠の形状を選択できます。</li>
-	<li>ボタン色：ボタン色を変更できます。</li>
-	<li>ボタンの文言：ボタン上の文言を設定できます。</li>
-	<li>リンク先URL：ボタンをクリックした時の飛び先URLを設定できます。</li>
-	<li>リンクの開き方：リンクの開き方を設定できます。ボタンをクリックした時に別タブで開きたい場合「別のタブ」を選択してください。</li>
-	<li>背景色：背景の帯の色を変更できます。</li>
+	<li>Development mode: Select "Show only to administrators" to display floating buttons only to users logged in as administrators. This is useful during initial setup. Select "Show to everyone" when you are ready to display them to all visitors.</li>
+	<li>Desktop button design: Choose the button design shown to visitors using desktop computers.</li>
+	<li>Mobile button design: Choose the button design shown to visitors using mobile devices.</li>
+	<li>Homepage display: Choose how floating buttons appear on the homepage.</li>
+	<li>Excluded post IDs: Floating buttons are hidden on posts and pages with the specified IDs. Enter the IDs of pages where you do not want a button to appear, such as a contact page.</li>
+	<li>Auto-hide: Automatically hide floating buttons when a visitor scrolls the page. Select "Always show" to turn off auto-hide.</li>
+	<li>Enable click tracking: Choose whether to track button clicks.</li>
+	<li>Exclude administrators from click tracking: Choose whether to track clicks from users logged in as administrators. For more accurate data, excluding administrators is recommended except during testing.</li>
+	<li>PRO version license key: Enter a paid PRO version license key to unlock additional features.</li>
 </ul>
+
+= Button Settings =
+
+Configure each floating button individually.
+
+<ul>
+	<li>Button type: Choose the button shape.</li>
+	<li>Button color: Change the button color.</li>
+	<li>Button text: Set the text displayed on the button.</li>
+	<li>Destination URL: Set the URL that opens when a visitor clicks the button.</li>
+	<li>Link behavior: Choose how the link opens. Select "New tab" to open it in a separate browser tab.</li>
+	<li>Background color: Change the color of the bar behind the button.</li>
+</ul>
+
+This plugin bundles the Montserrat font (SIL Open Font License 1.1).
+See css/fonts/OFL.txt for the full license text.
 
 == Installation ==
 
-= 自動インストール =
+= Automatic Installation =
 
-1.ワードプレス管理画面のプラグイン検索(プラグイン > 新規追加)にアクセス
-2.「Blog Floating Button」と入力し、「プラグインの検索」をクリック
-3.当プラグインが見つかったら「今すぐインストール」をクリック
-4.インストール後、プラグインを有効化
+1. In the WordPress admin area, go to Plugins > Add New.
+2. Enter "Blog Floating Button" and click "Search Plugins."
+3. When the plugin appears, click "Install Now."
+4. After installation, activate the plugin.
 
-= 手動インストール =
+= Manual Installation =
 
-1.プラグインをダウンロード
-2.blog-floating-button-latest.zipフォルダを/wp-content/plugins/
-3.ディレクトリにアップロード
-4.プラグイン画面(プラグイン > インストール済みプラグイン)でプラグインを有効化
+1. Download the plugin.
+2. Extract `blog-floating-button-latest.zip`.
+3. Upload the extracted plugin folder to `/wp-content/plugins/`.
+4. In the WordPress admin area, go to Plugins > Installed Plugins and activate the plugin.
 
 == Changelog ==
+= 1.4.21 =
+Security release.
+Fixed a stored XSS vulnerability in the access analytics report screen.
+Fixed a SQL injection vulnerability in the report screen's search and filter parameters.
+Fixed an error-reporting issue that could disclose server paths.
+Completed a plugin-wide review of output escaping and input sanitization.
+Addressed Plugin Check findings.
+
 = 1.4.20 =
-エラー出力レベル調整
+Adjusted error reporting levels.
 
 = 1.4.19 =
-プレビュー機能不具合修正
-ABテスト機能不具合修正
+Fixed an issue with the preview feature.
+Fixed an issue with the A/B testing feature.
 
 = 1.4.18 =
-ライセンス認証機能高速化
+Improved license activation performance.
 
 = 1.4.17 =
-ボタンテキストで <br> タグを使用可能に変更
-URLの文字制限を500文字に増加
-ボタンの表示・非表示機能の条件を変更
-「プラグイン情報」タブの不具合修正
+Allowed the `<br>` tag in button text.
+Increased the URL character limit to 500.
+Updated the conditions that control button visibility.
+Fixed an issue with the "Plugin Information" tab.
 
 = 1.4.16 =
-ショートコード([bfb_show]や[bfb_hide])の不具合修正
-「PCの出現ポイントの領域」と「スマホの出現ポイントの領域」の不具合修正
-プラグイン出力機能の改善
+Fixed issues with the `[bfb_show]` and `[bfb_hide]` shortcodes.
+Fixed issues with the desktop and mobile button display trigger areas.
+Improved plugin output handling.
 
 = 1.4.15 =
-PHP8.1.X対応
-PHP8.2.X対応
-WordPress6.5対応
-jQuery Migrateが読み込まれていない場合の不具合解消
-カスタム投稿タイプで個別設定ができるように変更
+Added support for PHP 8.1.x.
+Added support for PHP 8.2.x.
+Added support for WordPress 6.5.
+Fixed an issue that occurred when jQuery Migrate was not loaded.
+Added per-post settings for custom post types.
 
 = 1.4.14 =
-ログ削除機能追加
-設定項目出力機能追加
-WordPress6.3.2への対応
+Added a log deletion feature.
+Added a settings export feature.
+Added support for WordPress 6.3.2.
 
 = 1.4.13 =
-脆弱性対応
-軽微な不具合を修正
+Addressed security vulnerabilities.
+Fixed minor issues.
 
 = 1.4.12 =
-ヘルプを修正
-PHP8.1.0への対応
-WordPress6.1.1への対応
+Updated the help content.
+Added support for PHP 8.1.0.
+Added support for WordPress 6.1.1.
 
 = 1.4.11 =
-軽微な不具合を修正
+Fixed minor issues.
 
 = 1.4.10 =
-ヘルプへの追記
-軽微な不具合を修正
+Expanded the help content.
+Fixed minor issues.
 
 = 1.4.9 =
-個別投稿更新時にPRO版ライセンスキーなどがクリアされる不具合を解消
+Fixed an issue that cleared the PRO version license key and other settings when an individual post was updated.
 
 = 1.4.8 =
-非表示ページ(PRO版)の不具合
-一部の保存内容が削除できない不具合
-グラフ表示スクリプトの読み込み
-WPを下層ディレクトリに設置した時のアクセス解析
+Fixed an issue with hidden pages in the PRO version.
+Fixed an issue that prevented some saved settings from being deleted.
+Updated how the chart display script is loaded.
+Fixed access analytics for WordPress installations in a subdirectory.
 
 = 1.4.7 =
-一部環境で個別記事設定で保存できない不具合を修正
+Fixed an issue that prevented per-post settings from being saved in some environments.
 
 = 1.4.6 =
-セキュリティ向上
-細かい不具合を解消
+Improved security.
+Fixed minor issues.
 
 = 1.4.0 =
-A/Bテスト機能を実装
-ライブプレビューの仕組み変更
-データ検証、バリデーションの修正
-細かい不具合を解消
+Added A/B testing.
+Updated the live preview system.
+Improved data verification and validation.
+Fixed minor issues.
 
 = 1.3.4 =
-クリック計測の表示回数をユーザー数に変更
+Changed the click-tracking report from impression count to user count.
 
 = 1.3.3 =
-クリック計測レポートにグラフ機能を追加
+Added charts to the click-tracking report.
 
 = 1.3.1 =
-クリック計測機能を微修正
+Made minor improvements to click tracking.
 
 = 1.3.0 =
-クリック計測機能をリリース
+Released the click-tracking feature.
 
 = 1.2.3 =
-Undefined variable、Undefined indexを解消
-Cookie非表示期間の設定
+Resolved undefined variable and undefined index errors.
+Added a setting for how long buttons remain hidden via cookies.
 
 = 1.2.1 =
-マイクロコピー、説明文、ボタン文言の色変更を可能
-トップテキスト、説明文でHTMLを使用可能
-細かい不具合を解消
+Added color controls for microcopy, descriptions, and button text.
+Allowed HTML in the top text and description fields.
+Fixed minor issues.
 
 = 1.2.0 =
-カテゴリー個別設定機能をリリース(PRO版のみ)
-スクリプトの読み込みエラー解消
-フロートボタンの余白調整機能をリリース
+Released per-category settings for the PRO version.
+Fixed script loading errors.
+Added floating button spacing controls.
 
 = 1.1.7 =
-微修正とヘルプを追加
+Made minor improvements and added help content.
 
 = 1.1.6 =
-別タブで開かない不具合を解消
+Fixed an issue that prevented links from opening in a new tab.
 
 = 1.1.5 =
-編集画面のレイアウト崩れを修正
+Fixed the editor screen layout.
 
 = 1.1.4 =
 Initial working version.
 
 == Screenshots ==
 
-1. フロートボタンのデモ
-2. ボタン設定
-3. 解析レポートのグラフ
+1. Floating button demo
+2. Button settings
+3. Access analytics report chart
 
 == Frequently Asked Questions ==
 
-== Upgrade Notice == 
+== Upgrade Notice ==
+
+= 1.4.21 =
+Security release. Please update as soon as possible.

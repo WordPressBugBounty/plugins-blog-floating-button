@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="bfb_wrap" class="optimize">
 
 	<h1 class="bfb_h1">A/Bテストのパターン作成</h1>
@@ -25,7 +30,7 @@
 					<td>
 						<?php
 							foreach( $this->designTypes as $designType ): ?>
-								<label for="<?php echo esc_attr($designType); ?>_main"><input type="radio" id="<?php echo esc_attr($designType); ?>_main" name="mainBtnDesign" class="" value="<?php echo esc_attr($designType); ?>" <?= ($this->mainBtnDesign == $designType) ? 'checked' : '' ?>><?php echo esc_attr($this->designNames[$designType]); ?></label>
+								<label for="<?php echo esc_attr($designType); ?>_main"><input type="radio" id="<?php echo esc_attr($designType); ?>_main" name="mainBtnDesign" class="" value="<?php echo esc_attr($designType); ?>" <?php checked( $this->mainBtnDesign, $designType ); ?>><?php echo esc_attr($this->designNames[$designType]); ?></label>
 						<?php endforeach; ?>
 					</td>
 				</tr>
@@ -34,7 +39,7 @@
 					<td>
 						<?php
 							foreach( $this->designTypes as $designType ): ?>
-							<label for="<?php echo esc_attr($designType); ?>_sub"><input type="radio" id="<?php echo esc_attr($designType); ?>_sub" name="subBtnDesign" class="" value="<?php echo esc_attr($designType); ?>" <?= ($this->subBtnDesign == $designType) ? 'checked' : '' ?>><?php echo esc_attr($this->designNames[$designType]); ?></label>
+							<label for="<?php echo esc_attr($designType); ?>_sub"><input type="radio" id="<?php echo esc_attr($designType); ?>_sub" name="subBtnDesign" class="" value="<?php echo esc_attr($designType); ?>" <?php checked( $this->subBtnDesign, $designType ); ?>><?php echo esc_attr($this->designNames[$designType]); ?></label>
 						<?php endforeach; ?>
 					</td>
 				</tr>
@@ -47,7 +52,7 @@
 					<td>
 						<?php
 							foreach( $this->devices as $bfb_device ): ?>
-								<label for="<?php echo esc_attr($bfb_device); ?>"><input type="radio" id="<?php echo esc_attr($bfb_device); ?>" name="device" class="" value="<?php echo esc_attr($bfb_device); ?>" <?= ($this->device == $bfb_device)?'checked':''; ?>><?php echo esc_attr($this->devicesName[$bfb_device]); ?></label>
+								<label for="<?php echo esc_attr($bfb_device); ?>"><input type="radio" id="<?php echo esc_attr($bfb_device); ?>" name="device" class="" value="<?php echo esc_attr($bfb_device); ?>" <?php checked( $this->device, $bfb_device ); ?>><?php echo esc_attr($this->devicesName[$bfb_device]); ?></label>
 						<?php endforeach; ?>
 					</td>
 				</tr>

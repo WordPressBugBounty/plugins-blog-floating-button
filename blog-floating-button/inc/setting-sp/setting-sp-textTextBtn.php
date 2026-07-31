@@ -1,4 +1,8 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 	if( isset($this->optimize_step) ){
 		$optimize_step = '_'.$this->optimize_step;
 	}else{
@@ -69,16 +73,16 @@
 					$textTextBtn_btnType_sp_square_1 = '';
 					switch( $this->{'bfb_textTextBtn_btnType_sp'.$optimize_step} ){
 						case "rounded_corners":
-							$textTextBtn_btnType_sp_rounded_corners_1 = 'selected="selected"';
+							$textTextBtn_btnType_sp_rounded_corners_1 = 'selected';
 							break;
 						case "square":
-							$textTextBtn_btnType_sp_square_1 = 'selected="selected"';
+							$textTextBtn_btnType_sp_square_1 = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_textTextBtn_btnType_sp">
-					<option value="rounded_corners" <?php echo $textTextBtn_btnType_sp_rounded_corners_1; ?>>角丸ボタン</option>
-					<option value="square" <?php echo $textTextBtn_btnType_sp_square_1; ?>>四角ボタン</option>
+					<option value="rounded_corners" <?php echo esc_attr( $textTextBtn_btnType_sp_rounded_corners_1 ); ?>>角丸ボタン</option>
+					<option value="square" <?php echo esc_attr( $textTextBtn_btnType_sp_square_1 ); ?>>四角ボタン</option>
 				</select>
 			</td>
 		</tr>
@@ -94,31 +98,31 @@
 					$textTextBtn_btnColor_blue_sp = '';
 					switch( $this->{'bfb_textTextBtn_btnColor_sp'.$optimize_step} ){
 						case "red":
-							$textTextBtn_btnColor_red_sp = 'selected="selected"';
+							$textTextBtn_btnColor_red_sp = 'selected';
 							break;
 						case "pink":
-							$textTextBtn_btnColor_pink_sp = 'selected="selected"';
+							$textTextBtn_btnColor_pink_sp = 'selected';
 							break;
 						case "yellow":
-							$textTextBtn_btnColor_yellow_sp = 'selected="selected"';
+							$textTextBtn_btnColor_yellow_sp = 'selected';
 							break;
 						case "orange":
-							$textTextBtn_btnColor_orange_sp = 'selected="selected"';
+							$textTextBtn_btnColor_orange_sp = 'selected';
 							break;
 						case "green":
-							$textTextBtn_btnColor_green_sp = 'selected="selected"';
+							$textTextBtn_btnColor_green_sp = 'selected';
 							break;
 						case "blue":
-							$textTextBtn_btnColor_blue_sp = 'selected="selected"';
+							$textTextBtn_btnColor_blue_sp = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_textTextBtn_btnColor_sp">
-					<option value="red" <?php echo $textTextBtn_btnColor_red_sp; ?>>赤</option>
-					<option value="orange" <?php echo $textTextBtn_btnColor_orange_sp; ?>>オレンジ</option>
-					<option value="green" <?php echo $textTextBtn_btnColor_green_sp; ?>>緑</option>
-					<option value="blue" <?php echo $textTextBtn_btnColor_blue_sp; ?>>青</option>
-					<option value="yellow" <?php echo $textTextBtn_btnColor_yellow_sp; ?>>黄</option>
+					<option value="red" <?php echo esc_attr( $textTextBtn_btnColor_red_sp ); ?>>赤</option>
+					<option value="orange" <?php echo esc_attr( $textTextBtn_btnColor_orange_sp ); ?>>オレンジ</option>
+					<option value="green" <?php echo esc_attr( $textTextBtn_btnColor_green_sp ); ?>>緑</option>
+					<option value="blue" <?php echo esc_attr( $textTextBtn_btnColor_blue_sp ); ?>>青</option>
+					<option value="yellow" <?php echo esc_attr( $textTextBtn_btnColor_yellow_sp ); ?>>黄</option>
 				</select>
 			</td>
 		</tr>
@@ -174,12 +178,12 @@
 				<?php
 					$textTextBtn_linkTarget_sp_blank = '';
 					if( $this->{'bfb_textTextBtn_linkTarget_sp'.$optimize_step} == "blank" ){
-						$textTextBtn_linkTarget_sp_blank = 'selected="selected"';
+						$textTextBtn_linkTarget_sp_blank = 'selected';
 					}
 				?>
 				<select name="bfb_textTextBtn_linkTarget_sp">
 					<option value="self">同じタブ</option>
-					<option value="blank" <?php echo $textTextBtn_linkTarget_sp_blank; ?>>別のタブ</option>
+					<option value="blank" <?php echo esc_attr( $textTextBtn_linkTarget_sp_blank ); ?>>別のタブ</option>
 				</select>
 			</td>
 		</tr>
@@ -190,12 +194,12 @@
 				<?php
 					$textTextBtn_linkRel_sp_nofollow = '';
 					if( $this->{'bfb_textTextBtn_linkRel_sp'.$optimize_step} == "nofollow" ){
-						$textTextBtn_linkRel_sp_nofollow = 'selected="selected"';
+						$textTextBtn_linkRel_sp_nofollow = 'selected';
 					}
 				?>
 				<select name="bfb_textTextBtn_linkRel_sp">
 					<option value="">付与しない</option>
-					<option value="nofollow" <?php echo $textTextBtn_linkRel_sp_nofollow; ?>>nofollow</option>
+					<option value="nofollow" <?php echo esc_attr( $textTextBtn_linkRel_sp_nofollow ); ?>>nofollow</option>
 				</select>
 			</td>
 		</tr>
@@ -228,32 +232,32 @@
 					$textTextBtn_bfbBgColor_blue_sp = '';
 					switch( $this->{'bfb_textTextBtn_bfbBgColor_sp'.$optimize_step} ){
 						case "black":
-							$textTextBtn_bfbBgColor_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_sp = 'selected';
 							break;
 						case "red":
-							$textTextBtn_bfbBgColor_red_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_red_sp = 'selected';
 							break;
 						case "yellow":
-							$textTextBtn_bfbBgColor_yellow_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_yellow_sp = 'selected';
 							break;
 						case "orange":
-							$textTextBtn_bfbBgColor_orange_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_orange_sp = 'selected';
 							break;
 						case "green":
-							$textTextBtn_bfbBgColor_green_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_green_sp = 'selected';
 							break;
 						case "blue":
-							$textTextBtn_bfbBgColor_blue_sp = 'selected="selected"';
+							$textTextBtn_bfbBgColor_blue_sp = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_textTextBtn_bfbBgColor_sp">
-					<option value="black" <?php echo $textTextBtn_bfbBgColor_sp; ?>>黒</option>
-					<option value="red" <?php echo $textTextBtn_bfbBgColor_red_sp; ?>>赤</option>
-					<option value="yellow" <?php echo $textTextBtn_bfbBgColor_yellow_sp; ?>>黄</option>
-					<option value="orange" <?php echo $textTextBtn_bfbBgColor_orange_sp; ?>>オレンジ</option>
-					<option value="green" <?php echo $textTextBtn_bfbBgColor_green_sp; ?>>緑</option>
-					<option value="blue" <?php echo $textTextBtn_bfbBgColor_blue_sp; ?>>青</option>
+					<option value="black" <?php echo esc_attr( $textTextBtn_bfbBgColor_sp ); ?>>黒</option>
+					<option value="red" <?php echo esc_attr( $textTextBtn_bfbBgColor_red_sp ); ?>>赤</option>
+					<option value="yellow" <?php echo esc_attr( $textTextBtn_bfbBgColor_yellow_sp ); ?>>黄</option>
+					<option value="orange" <?php echo esc_attr( $textTextBtn_bfbBgColor_orange_sp ); ?>>オレンジ</option>
+					<option value="green" <?php echo esc_attr( $textTextBtn_bfbBgColor_green_sp ); ?>>緑</option>
+					<option value="blue" <?php echo esc_attr( $textTextBtn_bfbBgColor_blue_sp ); ?>>青</option>
 				</select>
 			</td>
 		</tr>

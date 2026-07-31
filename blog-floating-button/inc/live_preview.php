@@ -1,8 +1,13 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <script>
 //ライブプレビュー機能
 
 var btnData = {};
-var bfb_url = '<?php echo site_url('/wp-json/bfb/api/live_preview'); ?>';
+var bfb_url = <?php echo wp_json_encode( site_url( '/wp-json/bfb/api/live_preview' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 var bfb_tabs1_name = '';
 var bfb_tabs2_name = '';
 

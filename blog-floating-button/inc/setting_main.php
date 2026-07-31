@@ -1,7 +1,12 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $this->is_activation = $this->check_license_key();
 $this->is_activation_optimize = $this->check_license_key_optimize();
+$query_string = isset( $_SERVER['QUERY_STRING'] ) ? sanitize_text_field( wp_unslash( $_SERVER['QUERY_STRING'] ) ) : '';
 
 if( $pagenow == 'post.php' && !$this->is_activation ){
 	return false;
@@ -40,7 +45,7 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 <?php endif; ?>
 
 <?php if( $pagenow == 'admin.php' ): ?>
-	<form id="bfb_form" method="POST" action="?<?php echo esc_attr($_SERVER['QUERY_STRING']); ?>">
+	<form id="bfb_form" method="POST" action="?<?php echo esc_attr( $query_string ); ?>">
 <?php endif; ?>
 <?php wp_nonce_field( 'bfb_setting', '_wpnonce_bfb' ); ?>
 <div id="tabs">
@@ -192,7 +197,12 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 				<?php endif; ?>
 
 				<div class="preview_area">
-					<iframe srcdoc='<?php echo $this->insertFooter(); ?>'></iframe>
+					<?php
+					ob_start();
+					$this->insertFooter();
+					$pc_preview_html = ob_get_clean();
+					?>
+					<iframe srcdoc="<?php echo esc_attr( $pc_preview_html ); ?>"></iframe>
 				</div>
 
 			</div>
@@ -204,7 +214,12 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 				<?php endif; ?>
 
 				<div class="preview_area">
-					<iframe srcdoc='<?php echo $this->insertFooter('sp'); ?>'></iframe>
+					<?php
+					ob_start();
+					$this->insertFooter( 'sp' );
+					$sp_preview_html = ob_get_clean();
+					?>
+					<iframe srcdoc="<?php echo esc_attr( $sp_preview_html ); ?>"></iframe>
 				</div>
 
 			</div>
@@ -216,7 +231,7 @@ if( $this->is_activation ){ $is_pro = 'bfb_pro'; }
 <?php else: ?>
 
 	<div id="bfb_sub" class="bfb_free">
-		<?php echo $this->get_ad_html(); ?>
+		<?php echo wp_kses_post( $this->get_ad_html() ); ?>
 	</div><!--.bfb_sub-->
 
 <?php endif; ?>

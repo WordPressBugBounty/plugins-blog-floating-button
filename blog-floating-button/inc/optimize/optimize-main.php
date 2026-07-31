@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $filter_arg = array(
 	'action' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
 	'optimize_step' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
@@ -114,16 +118,16 @@ if( !empty($this->optimize_step) ){
 <script type="text/javascript">
 jQuery(function($){
 	$('a.alert').on('click',function(){
-		if( $(this).attr('action') == 'delete' ){
+		if( $(this).attr('data-action') == 'delete' ){
 			return alert_msg("設定データと最適化結果を削除します。一度削除したデータは復元できません。データを削除してよろしいですか？");
 		}
-		if( $(this).attr('action') == 'opt_start' ){
+		if( $(this).attr('data-action') == 'opt_start' ){
 			return alert_msg("テストを開始していいですか？");
 		}
-		if( $(this).attr('action') == 'opt_stop' ){
+		if( $(this).attr('data-action') == 'opt_stop' ){
 			return alert_msg("テストを停止していいですか？停止後に再開することもできます。");
 		}
-		if( $(this).attr('action') == 'opt_finish' ){
+		if( $(this).attr('data-action') == 'opt_finish' ){
 			return alert_msg("テストを完了していいですか？完了後はテスト再開できません。");
 		}
 	});

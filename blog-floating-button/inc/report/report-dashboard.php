@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 	$todays_data = $this->report->get_target_data();
 	$todays_data['date'] = date_i18n('Y-m-d');
 	$today['access'] = $todays_data['access'][$todays_data['date']] ?? '0';
@@ -36,7 +40,7 @@
 
 <table class="table th_yellow scroll">
 	<tr><th class="short_item"></th><th>本日</th><th>昨日</th><th>一昨日</th><th>今月</th><th>前月</th></tr>
-	<tr><td>ユーザー数</td><td><?php echo $today['access']; ?></td><td><?php echo $one_day_ago['access']; ?></td><td><?php echo $two_days_ago['access']; ?></td><td><?php echo $search_span['access']; ?></td><td><?php echo $last_month['access']; ?></td></tr>
-	<tr><td>クリック数</td><td><?php echo $today['click']; ?></td><td><?php echo $one_day_ago['click']; ?></td><td><?php echo $two_days_ago['click']; ?></td><td><?php echo $search_span['click']; ?></td><td><?php echo $last_month['click']; ?></td></tr>
-	<tr><td>クリック率</td><td><?php echo $today['click_rate']; ?>%</td><td><?php echo $one_day_ago['click_rate']; ?>%</td><td><?php echo $two_days_ago['click_rate']; ?>%</td><td><?php echo $search_span['click_rate']; ?>%</td><td><?php echo $last_month['click_rate']; ?>%</td></tr>
+	<tr><td>ユーザー数</td><td><?php echo esc_html( intval( $today['access'] ) ); ?></td><td><?php echo esc_html( intval( $one_day_ago['access'] ) ); ?></td><td><?php echo esc_html( intval( $two_days_ago['access'] ) ); ?></td><td><?php echo esc_html( intval( $search_span['access'] ) ); ?></td><td><?php echo esc_html( intval( $last_month['access'] ) ); ?></td></tr>
+	<tr><td>クリック数</td><td><?php echo esc_html( intval( $today['click'] ) ); ?></td><td><?php echo esc_html( intval( $one_day_ago['click'] ) ); ?></td><td><?php echo esc_html( intval( $two_days_ago['click'] ) ); ?></td><td><?php echo esc_html( intval( $search_span['click'] ) ); ?></td><td><?php echo esc_html( intval( $last_month['click'] ) ); ?></td></tr>
+	<tr><td>クリック率</td><td><?php echo esc_html( $today['click_rate'] ); ?>%</td><td><?php echo esc_html( $one_day_ago['click_rate'] ); ?>%</td><td><?php echo esc_html( $two_days_ago['click_rate'] ); ?>%</td><td><?php echo esc_html( $search_span['click_rate'] ); ?>%</td><td><?php echo esc_html( $last_month['click_rate'] ); ?>%</td></tr>
 </table>

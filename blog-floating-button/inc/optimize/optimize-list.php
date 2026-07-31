@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="bfb_wrap" class="optimize">
 
 	<h1 class="bfb_h1">A/Bテスト</h1>

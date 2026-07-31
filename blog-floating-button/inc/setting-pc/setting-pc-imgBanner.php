@@ -1,4 +1,8 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 	if( isset($this->optimize_step) ){
 		$optimize_step = '_'.$this->optimize_step;
 	}else{
@@ -25,24 +29,24 @@
 					$lt_pc = '';
 					switch( $this->{'bfb_imgBanner_bfbPos_pc'.$optimize_step} ){
 						case "rt":
-							$rt_pc = 'selected="selected"';
+							$rt_pc = 'selected';
 							break;
 						case "rb":
-							$rb_pc = 'selected="selected"';
+							$rb_pc = 'selected';
 							break;
 						case "lb":
-							$lb_pc = 'selected="selected"';
+							$lb_pc = 'selected';
 							break;
 						case "lt":
-							$lt_pc = 'selected="selected"';
+							$lt_pc = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_imgBanner_bfbPos_pc">
-					<option value="rt" <?php echo $rt_pc; ?>>右上</option>
-					<option value="rb" <?php echo $rb_pc; ?>>右下</option>
-					<option value="lb" <?php echo $lb_pc; ?>>左下</option>
-					<option value="lt" <?php echo $lt_pc; ?>>左上</option>
+					<option value="rt" <?php echo esc_attr( $rt_pc ); ?>>右上</option>
+					<option value="rb" <?php echo esc_attr( $rb_pc ); ?>>右下</option>
+					<option value="lb" <?php echo esc_attr( $lb_pc ); ?>>左下</option>
+					<option value="lt" <?php echo esc_attr( $lt_pc ); ?>>左上</option>
 				</select>
 			</td>
 		</tr>
@@ -68,12 +72,12 @@
 				<?php
 					$linktarget_pc_blank = '';
 					if( $this->{'bfb_imgBanner_linkTarget_pc'.$optimize_step} == "blank" ){
-						$linktarget_pc_blank = 'selected="selected"';
+						$linktarget_pc_blank = 'selected';
 					}
 				?>
 				<select name="bfb_imgBanner_linkTarget_pc">
 					<option value="self">同じタブ</option>
-					<option value="blank" <?php echo $linktarget_pc_blank; ?>>別のタブ</option>
+					<option value="blank" <?php echo esc_attr( $linktarget_pc_blank ); ?>>別のタブ</option>
 				</select>
 			</td>
 		</tr>
@@ -84,12 +88,12 @@
 				<?php
 					$imgBanner_linkRel_pc_nofollow = '';
 					if( $this->{'bfb_imgBanner_linkRel_pc'.$optimize_step} == "nofollow" ){
-						$imgBanner_linkRel_pc_nofollow = 'selected="selected"';
+						$imgBanner_linkRel_pc_nofollow = 'selected';
 					}
 				?>
 				<select name="bfb_imgBanner_linkRel_pc">
 					<option value="">付与しない</option>
-					<option value="nofollow" <?php echo $imgBanner_linkRel_pc_nofollow; ?>>nofollow</option>
+					<option value="nofollow" <?php echo esc_attr( $imgBanner_linkRel_pc_nofollow ); ?>>nofollow</option>
 				</select>
 			</td>
 		</tr>

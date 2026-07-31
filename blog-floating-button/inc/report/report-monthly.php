@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <h2>月別レポート</h2>
 
 <?php
@@ -29,7 +34,13 @@ foreach( $search_span as $date ){
 	}else{
 		$click_rate = 0;
 	}
-	echo "<tr><td>$today</td><td>$access_num</td><td>$click_num</td><td>$click_rate%</td></tr>";
+	printf(
+		'<tr><td>%1$s</td><td>%2$s</td><td>%3$s</td><td>%4$s%%</td></tr>',
+		esc_html( $today ),
+		esc_html( intval( $access_num ) ),
+		esc_html( intval( $click_num ) ),
+		esc_html( $click_rate )
+	);
 	$access_num_sum += $access_num;
 	$click_num_sum += $click_num;
 }
@@ -38,7 +49,12 @@ if( !empty($access_num_sum) ){
 }else{
 	$click_rate_sum = 0;
 }
-echo "<tr class='bold red'><td>合計</td><td>$access_num_sum</td><td>$click_num_sum</td><td>$click_rate_sum%</td></tr>";
+printf(
+	'<tr class="bold red"><td>合計</td><td>%1$s</td><td>%2$s</td><td>%3$s%%</td></tr>',
+	esc_html( intval( $access_num_sum ) ),
+	esc_html( intval( $click_num_sum ) ),
+	esc_html( $click_rate_sum )
+);
 ?>
 
 </table>

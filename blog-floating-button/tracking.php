@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Tracking {
 
 	private $access_log_table = 'bfb_access_log';
@@ -22,7 +26,7 @@ class Tracking {
 	}
 	public function write_clickLog( $data ) {
 
-		$data['ip']     = $_SERVER['REMOTE_ADDR'];
+		$data['ip']     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 		$data['device'] = $this->ch_device( $data['ua'] );
 
 		$res = $this->wpdb->insert( $this->click_log_table, $data, array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ) );
@@ -30,8 +34,8 @@ class Tracking {
 
 	public function get_user_data( $postData ) {
 
-		$ip = $_SERVER['REMOTE_ADDR'];
-		$ua = $_SERVER['HTTP_USER_AGENT'];
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 
 		$data = array(
 			'post_id'       => $postData['post_id'],
@@ -68,9 +72,9 @@ class Tracking {
 	public function get_first_last_date( $ym = null, $ym2 = null, $span = null ) {
 
 		if ( ! $ym ) {
-			$ym = date( 'Y-m' ); }
+			$ym = date_i18n( 'Y-m' ); }
 		if ( ! $ym2 ) {
-			$ym2 = date( 'Y-m-d', strtotime( 'last day of ' . $ym ) ); }
+			$ym2 = gmdate( 'Y-m-d', strtotime( 'last day of ' . $ym ) ); }
 
 		$start = new DateTime( $ym . '-01 00:00:00' );
 
@@ -95,54 +99,61 @@ class Tracking {
 			$table_name = $this->click_log_table;
 		}
 
+		$where  = array();
+		$params = array();
+
 		if ( ! empty( $data['start_date'] ) && ! empty( $data['end_date'] ) ) {
-			$search_date = " WHERE date BETWEEN '" . $data['start_date'] . " 00:00:00' AND '" . $data['end_date'] . " 23:59:59'";
+			$where[]  = 'date BETWEEN %s AND %s';
+			$params[] = $data['start_date'] . ' 00:00:00';
+			$params[] = $data['end_date'] . ' 23:59:59';
 		} else {
-			$search_date = " WHERE date BETWEEN '2000-01-01 00:00:00' AND '" . date_i18n( 'Y-m-d' ) . " 23:59:59'";
+			$where[]  = 'date BETWEEN %s AND %s';
+			$params[] = '2000-01-01 00:00:00';
+			$params[] = date_i18n( 'Y-m-d' ) . ' 23:59:59';
 		}
 
 		if ( ! empty( $data['memo'] ) ) {
-			$sql_memo = " AND memo LIKE '%" . $data['memo'] . "%'";
-		} else {
-			$sql_memo = '';
+			$where[]  = 'memo LIKE %s';
+			$params[] = '%' . $this->wpdb->esc_like( $data['memo'] ) . '%';
 		}
 		if ( ! empty( $data['post_url'] ) ) {
-			$sql_post_url = " AND post_url LIKE '%" . $data['post_url'] . "%'";
-		} else {
-			$sql_post_url = '';
+			$where[]  = 'post_url LIKE %s';
+			$params[] = '%' . $this->wpdb->esc_like( $data['post_url'] ) . '%';
 		}
 		if ( ! empty( $data['device'] ) ) {
-			$sql_device = " AND device LIKE '%" . $data['device'] . "%'";
-		} else {
-			$sql_device = '';
-		}
-		// 表示件数
-		if ( ! empty( $condi['limit'] ) ) {
-			$sql_limit = ' LIMIT ' . $condi['limit'];
-		} else {
-			// $sql_limit = ' LIMIT '.$this->pagination_limit;
-			$sql_limit = '';
-		}
-		// オフセット
-		if ( ! empty( $condi['paged'] ) ) {
-			if ( $condi['paged'] > 1 ) {
-				$sql_paged = ' OFFSET ' . ( $condi['limit'] * ( $condi['paged'] - 1 ) );
-			} else {
-				$sql_paged = '';
-			}
-		} else {
-			$sql_paged = '';
+			$where[]  = 'device LIKE %s';
+			$params[] = '%' . $this->wpdb->esc_like( $data['device'] ) . '%';
 		}
 		// テストID
 		if ( ! empty( $condi['optimize_id'] ) ) {
-			$sql_optimize_id = " AND optimize_id = '" . $condi['optimize_id'] . "'";
-		} else {
-			$sql_optimize_id = '';
+			$where[]  = 'optimize_id = %s';
+			$params[] = $condi['optimize_id'];
 		}
 
-		$datas = $this->wpdb->get_results( 'SELECT * FROM ' . $table_name . $search_date . " $sql_memo $sql_post_url $sql_device $sql_optimize_id ORDER BY date DESC " . $sql_limit . $sql_paged );
+		$query_params = $params;
 
-		$res_count      = $this->wpdb->get_results( 'SELECT * FROM ' . $table_name . $search_date . " $sql_memo $sql_post_url $sql_device $sql_optimize_id" );  // ページ送りせず全件取得
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定
+		$sql = 'SELECT * FROM ' . $table_name . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY date DESC';
+
+		// 表示件数
+		if ( ! empty( $condi['limit'] ) ) {
+			$sql            .= ' LIMIT %d';
+			$query_params[] = intval( $condi['limit'] );
+
+			// オフセット
+			if ( ! empty( $condi['paged'] ) && intval( $condi['paged'] ) > 1 ) {
+				$sql            .= ' OFFSET %d';
+				$query_params[] = intval( $condi['limit'] ) * ( intval( $condi['paged'] ) - 1 );
+			}
+		}
+
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $sql は固定の断片と %s/%d プレースホルダのみで構成し、値は prepare() でバインドしている
+		$datas = $this->wpdb->get_results( $this->wpdb->prepare( $sql, $query_params ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定
+		$count_sql      = 'SELECT * FROM ' . $table_name . ' WHERE ' . implode( ' AND ', $where );
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $count_sql は固定の断片と %s/%d プレースホルダのみで構成し、値は prepare() でバインドしている
+		$res_count      = $this->wpdb->get_results( $this->wpdb->prepare( $count_sql, $params ) );  // ページ送りせず全件取得
 		$datas['count'] = $this->wpdb->num_rows;    // 件数表示
 
 		return $datas;
@@ -160,65 +171,84 @@ class Tracking {
 			$table_name = $this->click_log_table;
 		}
 
+		$where  = array();
+		$params = array();
+
 		if ( ! empty( $data['start_date'] ) && ! empty( $data['end_date'] ) ) {
-			$search_date = " date BETWEEN '" . $data['start_date'] . " 00:00:00' AND '" . $data['end_date'] . " 23:59:59'";
-		} else {
-			$search_date = '';
+			$where[]  = 'date BETWEEN %s AND %s';
+			$params[] = $data['start_date'] . ' 00:00:00';
+			$params[] = $data['end_date'] . ' 23:59:59';
 		}
 		if ( ! empty( $data['post_url'] ) ) {
-			$sql_post_url = " AND post_url LIKE '%" . $data['post_url'] . "%'";
-		} else {
-			$sql_post_url = '';
+			$where[]  = 'post_url LIKE %s';
+			$params[] = '%' . $this->wpdb->esc_like( $data['post_url'] ) . '%';
 		}
 		if ( ! empty( $data['device'] ) ) {
-			$sql_device = " AND device LIKE '%" . $data['device'] . "%'";
-		} else {
-			$sql_device = '';
+			$where[]  = 'device LIKE %s';
+			$params[] = '%' . $this->wpdb->esc_like( $data['device'] ) . '%';
 		}
 
 		// テストID
 		if ( ! empty( $data['optimize_id'] ) ) {
-			$sql_optimize_id = " AND optimize_id = '" . $data['optimize_id'] . "'";
-		} else {
-			$sql_optimize_id = '';
-		}
-		if ( ! empty( $data['optimize_type'] ) ) {
-			$sql_optimize_type = " AND optimize_type = '" . $data['optimize_type'] . "'";
-		} else {
-			$sql_optimize_type = '';
+			$where[]  = 'optimize_id = %s';
+			$params[] = $data['optimize_id'];
 		}
 
-		if ( ! empty( $search_date ) || ! empty( $sql_post_url ) || ! empty( $sql_device ) || ! empty( $sql_optimize_id ) ) {
-			$sql_str = ' WHERE' . $search_date . $sql_post_url . $sql_device . $sql_optimize_id . $sql_optimize_type;
-			$sql_str = str_replace( 'WHERE AND', 'WHERE', $sql_str );
-			$sql_str = rtrim( $sql_str, ' AND' );
+		// optimize_type 単独では絞り込まない従来動作を維持する。
+		if ( ! empty( $data['optimize_type'] ) && ! empty( $where ) ) {
+			$where[]  = 'optimize_type = %s';
+			$params[] = $data['optimize_type'];
+		}
+
+		$sql_where = '';
+		if ( ! empty( $where ) ) {
+			$sql_where = ' WHERE ' . implode( ' AND ', $where );
+		}
+
+		if ( ! empty( $params ) ) {
+			$daily_date_format    = '%%Y-%%m-%%d';
+			$daily_group_format   = '%%Y%%m%%d';
+			$monthly_date_format  = '%%Y-%%m';
+			$monthly_group_format = '%%Y%%m';
 		} else {
-			$sql_str = '';
+			$daily_date_format    = '%Y-%m-%d';
+			$daily_group_format   = '%Y%m%d';
+			$monthly_date_format  = '%Y-%m';
+			$monthly_group_format = '%Y%m';
 		}
 
 		if ( $span == 'daily' ) {
 
-			$datas = $this->wpdb->get_results(
-				"
-				SELECT DATE_FORMAT(date, '%Y-%m-%d') as 'date',
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定し、集計式と日付書式も関数内の固定値
+			$sql = "
+				SELECT DATE_FORMAT(date, '" . $daily_date_format . "') as 'date',
 					COUNT(" . $distinct . ') as count 
 				FROM ' . $table_name
-				. $sql_str . "
-				GROUP BY DATE_FORMAT(date, '%Y%m%d') ORDER BY date DESC
-			"
-			);
+				. $sql_where . "
+				GROUP BY DATE_FORMAT(date, '" . $daily_group_format . "') ORDER BY date DESC
+			";
 
 		} elseif ( $span == 'monthly' ) {
 
-			$datas = $this->wpdb->get_results(
-				"
-				SELECT DATE_FORMAT(date, '%Y-%m') as 'date',
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定し、集計式と日付書式も関数内の固定値
+			$sql = "
+				SELECT DATE_FORMAT(date, '" . $monthly_date_format . "') as 'date',
 					COUNT(" . $distinct . ') as count
 				FROM ' . $table_name
-				. $sql_str . "
-				GROUP BY DATE_FORMAT(date, '%Y%m') ORDER BY date DESC
-			"
-			);
+				. $sql_where . "
+				GROUP BY DATE_FORMAT(date, '" . $monthly_group_format . "') ORDER BY date DESC
+			";
+
+		}
+
+		if ( isset( $sql ) ) {
+			if ( ! empty( $params ) ) {
+				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $sql は固定の断片と %s/%d プレースホルダのみで構成し、値は prepare() でバインドしている
+				$datas = $this->wpdb->get_results( $this->wpdb->prepare( $sql, $params ) );
+			} else {
+				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $sql は固定の断片のみで構成され、バインド対象の値がない
+				$datas = $this->wpdb->get_results( $sql );
+			}
 
 		}
 
@@ -230,12 +260,12 @@ class Tracking {
 
 		if ( ! empty( $span ) ) {
 			if ( strpos( $span, 'month' ) === false ) {
-				return date( 'Y-m-d', strtotime( $span . $date ) );
+				return gmdate( 'Y-m-d', strtotime( $span . $date ) );
 			} else {
-				return date( 'Y-m', strtotime( $span . $date ) );
+				return gmdate( 'Y-m', strtotime( $span . $date ) );
 			}
 		} else {
-			return date( 'Y-m-d', strtotime( $date ) );
+			return gmdate( 'Y-m-d', strtotime( $date ) );
 		}
 	}
 	// 指定日のデータ取得
@@ -259,12 +289,12 @@ class Tracking {
 
 		if ( ! empty( $date ) ) {
 			// 日付指定があれば
-			$start_date = date( 'Y-m-01', strtotime( $date ) );
-			$end_date   = date( 'Y-m-t', strtotime( $start_date ) );  // 月末取得
+			$start_date = gmdate( 'Y-m-01', strtotime( $date ) );
+			$end_date   = gmdate( 'Y-m-t', strtotime( $start_date ) );  // 月末取得
 		} else {
 			// 日付指定がない
 			$start_date = $this->get_target_date( date_i18n( 'Y-m-01' ), $span );
-			$end_date   = date( 'Y-m-t', strtotime( $start_date ) );  // 月末取得
+			$end_date   = gmdate( 'Y-m-t', strtotime( $start_date ) );  // 月末取得
 		}
 
 		$search_data = array(
@@ -331,32 +361,32 @@ class Tracking {
 		$js_data['max_click']      = $max_click;
 		$js_data['max_click_rate'] = $max_click_rate;
 
-		$js_data['date']       = '';
-		$js_data['access']     = '';
-		$js_data['click']      = '';
-		$js_data['click_rate'] = '';
+		$js_data['date']       = array();
+		$js_data['access']     = array();
+		$js_data['click']      = array();
+		$js_data['click_rate'] = array();
 
 		if ( isset( $graphData ) && is_array( $graphData ) ) {
 
 			foreach ( $graphData['date'] as $date ) {
 
 				if ( isset( $date ) ) {
-					$js_data['date'] .= "'" . $date . "',";
+					$js_data['date'][] = $date;
 				}
 				if ( isset( $graphData['access'][ $date ] ) ) {
-					$js_data['access'] .= "'" . $graphData['access'][ $date ] . "',";
+					$js_data['access'][] = intval( $graphData['access'][ $date ] );
 				} else {
-					$js_data['access'] .= ',';
+					$js_data['access'][] = null;
 				}
 				if ( isset( $graphData['click'][ $date ] ) ) {
-					$js_data['click'] .= "'" . $graphData['click'][ $date ] . "',";
+					$js_data['click'][] = intval( $graphData['click'][ $date ] );
 				} else {
-					$js_data['click'] .= ',';
+					$js_data['click'][] = null;
 				}
 				if ( isset( $graphData['click_rate'][ $date ] ) ) {
-					$js_data['click_rate'] .= "'" . $graphData['click_rate'][ $date ] . "',";
+					$js_data['click_rate'][] = floatval( $graphData['click_rate'][ $date ] );
 				} else {
-					$js_data['click_rate'] .= ',';
+					$js_data['click_rate'][] = null;
 				}
 			}
 		}
@@ -366,9 +396,9 @@ class Tracking {
 	// ABテストのグラフ
 	public function graphDate_clickRate( $date_datas, $mainDatas, $subDatas ) {
 
-		$js_data['date'] = '';
-		$js_data['main'] = '';
-		$js_data['sub']  = '';
+		$js_data['date'] = array();
+		$js_data['main'] = array();
+		$js_data['sub']  = array();
 
 		foreach ( $date_datas as $date ) {
 			$today               = $date->format( 'Y-m-d' );
@@ -390,17 +420,17 @@ class Tracking {
 			}
 
 			if ( isset( $date ) ) {
-				$js_data['date'] .= "'" . $date . "',";
+				$js_data['date'][] = $date;
 			}
 			if ( isset( $mainCTR ) ) {
-				$js_data['main'] .= "'" . $mainCTR . "',";
+				$js_data['main'][] = floatval( $mainCTR );
 			} else {
-				$js_data['main'] .= ',';
+				$js_data['main'][] = null;
 			}
 			if ( isset( $subCTR ) ) {
-				$js_data['sub'] .= "'" . $subCTR . "',";
+				$js_data['sub'][] = floatval( $subCTR );
 			} else {
-				$js_data['sub'] .= ',';
+				$js_data['sub'][] = null;
 			}
 		}
 
@@ -418,12 +448,12 @@ class Tracking {
 			$limit     = $condi['limit'];
 			$paged_num = ceil( $data['count'] / $condi['limit'] );
 		} else {
-			$limit     = $pagination_limit;
+			$limit     = $this->pagination_limit;
 			$paged_num = ceil( $data['count'] / $this->pagination_limit );
 		}
 
 		if ( $paged_num < 2 ) {
-			$res['count_text'] = '全' . $data['count'] . '件を表示中';
+			$res['count_text'] = '全' . intval( $data['count'] ) . '件を表示中';
 			return $res;
 		}
 
@@ -439,7 +469,9 @@ class Tracking {
 		if ( $res['max_count'] > $data['count'] ) {
 			$res['max_count'] = $data['count']; }
 
-		$url = ltrim( mb_strstr( $_SERVER['REQUEST_URI'], '?' ), '?' ); // パラメータ部分を取得
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$url         = mb_strstr( $request_uri, '?' );
+		$url         = false === $url ? '' : ltrim( $url, '?' ); // パラメータ部分を取得
 		parse_str( $url, $param );
 
 		unset( $param['paged'] );  // パラメータのpagedは削除
@@ -476,18 +508,21 @@ class Tracking {
 				$active = 'class="active"';
 			}
 
-			$res['html'] .= '<a href="?' . $pagination_param . '&paged=' . $i . '" ' . $active . '>' . $i . '</a>';
+			$pagination_url = '?' . $pagination_param . ( $pagination_param ? '&' : '' ) . 'paged=' . intval( $i );
+			$res['html']    .= '<a href="' . esc_url( $pagination_url ) . '" ' . $active . '>' . esc_html( intval( $i ) ) . '</a>';
 
 		}
 		if ( $min_pagination > 1 ) {
-			$res['html'] = '<a href="?' . $pagination_param . '&paged=1">最初へ</a> ' . $res['html'];
+			$pagination_url = '?' . $pagination_param . ( $pagination_param ? '&' : '' ) . 'paged=1';
+			$res['html']     = '<a href="' . esc_url( $pagination_url ) . '">最初へ</a> ' . $res['html'];
 		}
 		if ( $max_pagination < $paged_num ) {
-			$res['html'] = $res['html'] . ' <a href="?' . $pagination_param . '&paged=' . $paged_num . '">最後へ</a>';
+			$pagination_url = '?' . $pagination_param . ( $pagination_param ? '&' : '' ) . 'paged=' . intval( $paged_num );
+			$res['html']     = $res['html'] . ' <a href="' . esc_url( $pagination_url ) . '">最後へ</a>';
 		}
 		$res['html'] = '<div class="bfb_pagination">' . $res['html'] . '</div>';
 
-		$res['count_text'] = '全' . $res['count'] . '件中' . ( $paged > 0 ? ( $paged + 1 ) : 1 ) . 'ページ目';
+		$res['count_text'] = '全' . intval( $res['count'] ) . '件中' . intval( $paged > 0 ? ( $paged + 1 ) : 1 ) . 'ページ目';
 
 		return $res;
 	}

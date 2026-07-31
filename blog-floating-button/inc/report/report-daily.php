@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <h2>日別レポート</h2>
 
 <?php
@@ -28,7 +33,14 @@ foreach( $search_span as $date ){
 
 	$click_rate = $this->report->calc_click_rate($access_num,$click_num);
 
-	$table_html = "<tr><td>$today</td><td>$access_num</td><td>$click_num</td><td>$click_rate%</td></tr>$table_html";
+	$table_html = sprintf(
+		'<tr><td>%1$s</td><td>%2$s</td><td>%3$s</td><td>%4$s%%</td></tr>%5$s',
+		esc_html( $today ),
+		esc_html( intval( $access_num ) ),
+		esc_html( intval( $click_num ) ),
+		esc_html( $click_rate ),
+		$table_html
+	);
 	$access_num_sum += $access_num;
 	$click_num_sum += $click_num;
 }
@@ -37,8 +49,13 @@ if( !empty($access_num_sum) ){
 }else{
 	$click_rate_sum = 0;
 }
-echo $table_html;
-echo "<tr class='bold red'><td>合計</td><td>$access_num_sum</td><td>$click_num_sum</td><td>$click_rate_sum%</td></tr>";
+echo wp_kses_post( $table_html );
+printf(
+	'<tr class="bold red"><td>合計</td><td>%1$s</td><td>%2$s</td><td>%3$s%%</td></tr>',
+	esc_html( intval( $access_num_sum ) ),
+	esc_html( intval( $click_num_sum ) ),
+	esc_html( $click_rate_sum )
+);
 ?>
 </tbody>
 </table>

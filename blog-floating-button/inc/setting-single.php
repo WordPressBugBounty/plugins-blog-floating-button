@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <table class="form-table">
 	<tbody>
 <?php if( $pagenow == 'post.php' ): ?>
@@ -10,20 +15,20 @@
 					$bfb_use_post_select_not_use = '';
 					switch( $this->bfb_use_post ){
 						case "true":
-							$bfb_use_post_select_use = 'selected="selected"';
+							$bfb_use_post_select_use = 'selected';
 							break;
 						case "none":
-							$bfb_use_post_select_none = 'selected="selected"';
+							$bfb_use_post_select_none = 'selected';
 							break;
 						default:
-							$bfb_use_post_select_not_use = 'selected="selected"';
+							$bfb_use_post_select_not_use = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_use_post">
-					<option value="false" <?php echo $bfb_use_post_select_not_use; ?>>個別設定を使用しない</option>
-					<option value="true" <?php echo $bfb_use_post_select_use; ?>>個別設定を優先</option>
-					<option value="none" <?php echo $bfb_use_post_select_none; ?>>このページでは非表示</option>
+					<option value="false" <?php echo esc_attr( $bfb_use_post_select_not_use ); ?>>個別設定を使用しない</option>
+					<option value="true" <?php echo esc_attr( $bfb_use_post_select_use ); ?>>個別設定を優先</option>
+					<option value="none" <?php echo esc_attr( $bfb_use_post_select_none ); ?>>このページでは非表示</option>
 				</select>
 			</td>
 		</tr>
@@ -37,7 +42,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'sp' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_pc==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';							
 							switch($optData['status']){
 								case 1:
@@ -50,13 +54,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_pc, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_pc">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -69,7 +83,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'pc' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_sp==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';
 							switch($optData['status']){
 								case 1:
@@ -82,13 +95,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_sp, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_sp">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -105,20 +128,20 @@
 					$bfb_use_category_select_not_use = '';
 					switch( $this->bfb_use_category ){
 						case "true":
-							$bfb_use_category_select_use = 'selected="selected"';
+							$bfb_use_category_select_use = 'selected';
 							break;
 						case "none":
-							$bfb_use_category_select_none = 'selected="selected"';
+							$bfb_use_category_select_none = 'selected';
 							break;
 						default:
-							$bfb_use_category_select_not_use = 'selected="selected"';
+							$bfb_use_category_select_not_use = 'selected';
 							break;
 					}
 				?>
 				<select name="bfb_use_category">
-					<option value="false" <?php echo $bfb_use_category_select_not_use; ?>>個別設定を使用しない</option>
-					<option value="true" <?php echo $bfb_use_category_select_use; ?>>個別設定を優先</option>
-					<option value="none" <?php echo $bfb_use_category_select_none; ?>>このカテゴリーでは非表示</option>
+					<option value="false" <?php echo esc_attr( $bfb_use_category_select_not_use ); ?>>個別設定を使用しない</option>
+					<option value="true" <?php echo esc_attr( $bfb_use_category_select_use ); ?>>個別設定を優先</option>
+					<option value="none" <?php echo esc_attr( $bfb_use_category_select_none ); ?>>このカテゴリーでは非表示</option>
 				</select>
 			</td>
 		</tr>
@@ -139,7 +162,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'sp' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_pc==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';							
 							switch($optData['status']){
 								case 1:
@@ -152,13 +174,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_pc, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_pc">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -171,7 +203,6 @@
 					if( !empty($optDatas) ){
 						foreach( $optDatas as $optId => $optData ){
 							if( $optData['device'] == 'pc' ) continue;
-							$bfb_optId_checked = ($this->bfb_optId_sp==$optId)?'selected="selected"':'';
 							$bfb_opt_status = '';
 							switch($optData['status']){
 								case 1:
@@ -184,13 +215,23 @@
 									$bfb_opt_status = '【停止】';
 									break;
 							}
-							$opt_html .= '<option value="'.$optId.'" '.$bfb_optId_checked.'>'.$bfb_opt_status.$optData['optimize_name'].'('.$optId.')</option>';
+							$opt_html .= '<option value="' . esc_attr( $optId ) . '"' . selected( $this->bfb_optId_sp, $optId, false ) . '>' . esc_html( $bfb_opt_status . $optData['optimize_name'] . '(' . $optId . ')' ) . '</option>';
 						}
 					}
 				?>
 				<select name="bfb_optId_sp">
 					<option value="">実施しない</option>
-					<?php echo $opt_html; ?>
+					<?php
+					echo wp_kses(
+						$opt_html,
+						array(
+							'option' => array(
+								'value'    => array(),
+								'selected' => array(),
+							),
+						)
+					);
+					?>
 				</select>
 			</td>
 		</tr>
@@ -207,28 +248,28 @@
 				$bfb_designType_pc_none = '';
 				switch( $this->bfb_designType_pc ){
 					case "textBtn":
-						$bfb_designType_pc_textBtn = 'selected="selected"';
+						$bfb_designType_pc_textBtn = 'selected';
 						break;
 					case "textTextBtn":
-						$bfb_designType_pc_textTextBtn = 'selected="selected"';
+						$bfb_designType_pc_textTextBtn = 'selected';
 						break;
 					case "textBtnTextBtn":
-						$bfb_designType_pc_textBtnTextBtn = 'selected="selected"';
+						$bfb_designType_pc_textBtnTextBtn = 'selected';
 						break;
 					case "imgBanner":
-						$bfb_designType_pc_imgBanner = 'selected="selected"';
+						$bfb_designType_pc_imgBanner = 'selected';
 						break;
 					case "none":
-						$bfb_designType_pc_none = 'selected="selected"';
+						$bfb_designType_pc_none = 'selected';
 						break;
 				}
 			?>
 			<select name="bfb_designType_pc">
-				<option value="textBtn" <?php echo $bfb_designType_pc_textBtn; ?>>ボタンのみ</option>
-				<option value="textTextBtn" <?php echo $bfb_designType_pc_textTextBtn; ?>>説明文+ボタン</option>
-				<option value="textBtnTextBtn" <?php echo $bfb_designType_pc_textBtnTextBtn; ?>>ボタン+ボタン</option>
-				<option value="imgBanner" <?php echo $bfb_designType_pc_imgBanner; ?>>バナー画像</option>
-				<option value="none" <?php echo $bfb_designType_pc_none; ?>>表示しない</option>
+				<option value="textBtn" <?php echo esc_attr( $bfb_designType_pc_textBtn ); ?>>ボタンのみ</option>
+				<option value="textTextBtn" <?php echo esc_attr( $bfb_designType_pc_textTextBtn ); ?>>説明文+ボタン</option>
+				<option value="textBtnTextBtn" <?php echo esc_attr( $bfb_designType_pc_textBtnTextBtn ); ?>>ボタン+ボタン</option>
+				<option value="imgBanner" <?php echo esc_attr( $bfb_designType_pc_imgBanner ); ?>>バナー画像</option>
+				<option value="none" <?php echo esc_attr( $bfb_designType_pc_none ); ?>>表示しない</option>
 			</select>
 		</td>
 	</tr>
@@ -243,28 +284,28 @@
 				$bfb_designType_sp_none = '';
 				switch( $this->bfb_designType_sp ){
 					case "textBtn":
-						$bfb_designType_sp_textBtn = 'selected="selected"';
+						$bfb_designType_sp_textBtn = 'selected';
 						break;
 					case "textTextBtn":
-						$bfb_designType_sp_textTextBtn = 'selected="selected"';
+						$bfb_designType_sp_textTextBtn = 'selected';
 						break;
 					case "textBtnTextBtn":
-						$bfb_designType_sp_textBtnTextBtn = 'selected="selected"';
+						$bfb_designType_sp_textBtnTextBtn = 'selected';
 						break;
 					case "imgBanner":
-						$bfb_designType_sp_imgBanner = 'selected="selected"';
+						$bfb_designType_sp_imgBanner = 'selected';
 						break;
 					case "none":
-						$bfb_designType_sp_none = 'selected="selected"';
+						$bfb_designType_sp_none = 'selected';
 						break;
 				}
 			?>
 			<select name="bfb_designType_sp">
-				<option value="textBtn" <?php echo $bfb_designType_sp_textBtn; ?>>ボタンのみ</option>
-				<option value="textTextBtn" <?php echo $bfb_designType_sp_textTextBtn; ?>>説明文+ボタン</option>
-				<option value="textBtnTextBtn" <?php echo $bfb_designType_sp_textBtnTextBtn; ?>>ボタン+ボタン</option>
-				<option value="imgBanner" <?php echo $bfb_designType_sp_imgBanner; ?>>バナー画像</option>
-				<option value="none" <?php echo $bfb_designType_sp_none; ?>>表示しない</option>
+				<option value="textBtn" <?php echo esc_attr( $bfb_designType_sp_textBtn ); ?>>ボタンのみ</option>
+				<option value="textTextBtn" <?php echo esc_attr( $bfb_designType_sp_textTextBtn ); ?>>説明文+ボタン</option>
+				<option value="textBtnTextBtn" <?php echo esc_attr( $bfb_designType_sp_textBtnTextBtn ); ?>>ボタン+ボタン</option>
+				<option value="imgBanner" <?php echo esc_attr( $bfb_designType_sp_imgBanner ); ?>>バナー画像</option>
+				<option value="none" <?php echo esc_attr( $bfb_designType_sp_none ); ?>>表示しない</option>
 			</select>
 		</td>
 	</tr>

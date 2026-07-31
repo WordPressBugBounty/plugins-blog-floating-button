@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 require_once 'tracking.php';
 
 class Optimize extends BlogFloatingButton {
@@ -94,12 +98,27 @@ class Optimize extends BlogFloatingButton {
 	}
 	public function read_optimize( $opt_id = null ) {
 
-		$sql_opt_id = '';
+		$where  = array();
+		$params = array();
+
 		if ( isset( $opt_id ) ) {
-			$sql_opt_id = ' WHERE `optimize_id` = \'' . $opt_id . '\'';
+			$where[]  = '`optimize_id` = %s';
+			$params[] = $opt_id;
 		}
 
-		$datas = $this->wpdb->get_results( 'SELECT * FROM ' . $this->optimizemeta_table . $sql_opt_id );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定
+		$sql = 'SELECT * FROM ' . $this->optimizemeta_table;
+		if ( ! empty( $where ) ) {
+			$sql .= ' WHERE ' . implode( ' AND ', $where );
+		}
+
+		if ( ! empty( $params ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $sql は固定の断片と %s/%d プレースホルダのみで構成し、値は prepare() でバインドしている
+			$datas = $this->wpdb->get_results( $this->wpdb->prepare( $sql, $params ) );
+		} else {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared -- $sql は固定の断片のみで構成され、バインド対象の値がない
+			$datas = $this->wpdb->get_results( $sql );
+		}
 
 		if ( empty( $datas ) ) {
 			return false; }
@@ -160,7 +179,7 @@ class Optimize extends BlogFloatingButton {
 			'bfb-admin-js',
 			plugins_url( 'js/bfb_admin.js', __FILE__ ),
 			array( 'jquery' ),
-			false,
+			BFB_PLUGIN_VERSION,
 			true
 		);
 		wp_enqueue_script( 'bfb-admin-js' );
@@ -177,6 +196,7 @@ class Optimize extends BlogFloatingButton {
 		$validation_flg = true;
 
 		// POSTデータなしか戻るボタンなら保存はしない
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- 直後の check_admin_referer() で検証している
 		if ( ! $_POST ) {
 			return false; }
 
@@ -206,7 +226,21 @@ class Optimize extends BlogFloatingButton {
 
 		foreach ( $this->{'optimizeItems_' . $this->optimizeStep[ $this->optimize_step ]} as $item => $validates ) {
 
-			$post_data = $_POST[ $item ] ?? '';
+			$post_data = '';
+			if ( isset( $_POST[ $item ] ) ) {
+				if ( 'memo' === $item ) {
+					$post_data = sanitize_textarea_field( wp_unslash( $_POST[ $item ] ) );
+				} elseif ( in_array( $item, array( 'distribution_rate', 'status' ), true ) ) {
+					$post_data = absint( wp_unslash( $_POST[ $item ] ) );
+				} else {
+					$post_data = sanitize_text_field( wp_unslash( $_POST[ $item ] ) );
+				}
+			}
+			if ( in_array( $item, array( 'mainBtnDesign', 'subBtnDesign' ), true ) && ! in_array( $post_data, $this->designTypes, true ) ) {
+				$post_data = '';
+			} elseif ( 'device' === $item && ! in_array( $post_data, $this->devices, true ) ) {
+				$post_data = '';
+			}
 
 			$is_validate = $this->check_validation( $post_data, $validates );
 			if ( ! $is_validate ) {
@@ -329,7 +363,7 @@ class Optimize extends BlogFloatingButton {
 		$str   = array_merge( range( 'a', 'z' ), range( '0', '9' ), range( 'A', 'Z' ) );
 		$r_str = null;
 		for ( $i = 0; $i < $length; $i++ ) {
-			$r_str .= $str[ rand( 0, count( $str ) - 1 ) ];
+			$r_str .= $str[ wp_rand( 0, count( $str ) - 1 ) ];
 		}
 		return $r_str;
 	}
@@ -364,7 +398,9 @@ class Optimize extends BlogFloatingButton {
 	// 最適化テスト実施中か
 	public function is_optimize() {
 
-		$url             = ( empty( $_SERVER['HTTPS'] ) ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		$http_host       = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
+		$request_uri     = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$url             = esc_url_raw( ( empty( $_SERVER['HTTPS'] ) ? 'http://' : 'https://' ) . $http_host . $request_uri );
 		$opt_datas       = $this->read_optimize();
 		$opt_activeDatas = array();
 

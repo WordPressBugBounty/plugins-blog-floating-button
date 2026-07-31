@@ -1,14 +1,20 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
     if ( is_home() || is_front_page() ){
         $post_id = 0;
     }else{
         $post_id = get_the_ID();
     }
 
-    $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $referer = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'';
-    $ua = $_SERVER['HTTP_USER_AGENT'];
+    $url     = ( empty( $_SERVER['HTTPS'] ) ? 'http://' : 'https://' )
+        . ( isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '' )
+        . ( isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '' );
+    $referer = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+    $ua      = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 
     if( isset($this->optimize_id) ){
         $optimize_id = $this->optimize_id;
@@ -25,14 +31,12 @@
 
 <script>
 
-//var bfb_tracking_access_url = '<?php echo plugins_url( 'api/tracking_access.php', dirname(__FILE__) ); ?>';
-//var bfb_tracking_click_url = '<?php echo plugins_url( 'api/tracking_click.php', dirname(__FILE__) ); ?>';
-var api_endpoint = '<?php echo home_url('/wp-json/bfb/api/bfb_write_log'); ?>';
+var api_endpoint = <?php echo wp_json_encode( home_url( '/wp-json/bfb/api/bfb_write_log' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
-var bfb_post_id = <?php echo esc_attr($post_id); ?>;
-var bfb_post_url = '<?php echo esc_attr($url); ?>';
-var bfb_referer = '<?php echo esc_attr($referer); ?>';
-var bfb_ua = '<?php echo esc_attr($ua); ?>';
+var bfb_post_id = <?php echo wp_json_encode( (int) $post_id ); ?>;
+var bfb_post_url = <?php echo wp_json_encode( $url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+var bfb_referer = <?php echo wp_json_encode( $referer, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+var bfb_ua = <?php echo wp_json_encode( $ua, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 (function($){
 
@@ -70,13 +74,13 @@ function bfb_write_access(){
     <?php
         if( $this->is_mobile() ){
             if( !empty($this->bfb_optId_sp) && !empty($this->optimize_type_sp) ){
-                echo 'bfb_optimize_id = \''.$this->bfb_optId_sp."';\n";
-                echo 'bfb_optimize_type = \''.$this->optimize_type_sp."';\n";
+                echo 'bfb_optimize_id = ' . wp_json_encode( $this->bfb_optId_sp, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ";\n";
+                echo 'bfb_optimize_type = ' . wp_json_encode( $this->optimize_type_sp, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ";\n";
             }
         }else{
             if( !empty($this->bfb_optId_pc) && !empty($this->optimize_type_pc) ){
-                echo 'bfb_optimize_id = \''.$this->bfb_optId_pc."';\n";
-                echo 'bfb_optimize_type = \''.$this->optimize_type_pc."';\n";
+                echo 'bfb_optimize_id = ' . wp_json_encode( $this->bfb_optId_pc, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ";\n";
+                echo 'bfb_optimize_type = ' . wp_json_encode( $this->optimize_type_pc, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ";\n";
             }
         }
     ?>

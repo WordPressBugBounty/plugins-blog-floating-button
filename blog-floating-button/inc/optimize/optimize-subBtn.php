@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="bfb_wrap" class="optimize">
 
 	<h1 class="bfb_h1">A/Bテストのパターン作成</h1>
@@ -27,7 +32,7 @@
 				<table class="form-table">
 					<tr>
 						<th>テストID<span class="bfb_popup_help" data-message="自動付与されるIDです。変更はできません。">?</span></th>
-						<td><input type="text" class="regular-text" value="<?php echo $this->optimize_id; ?>" readonly><small class="bfb_small">自動付与されるため変更できません。</small></td>
+						<td><input type="text" class="regular-text" value="<?php echo esc_attr( $this->optimize_id ); ?>" readonly><small class="bfb_small">自動付与されるため変更できません。</small></td>
 					</tr>
 				</table>
 

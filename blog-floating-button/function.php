@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // 管理画面でスクリプト読み込み
 function bfb_admin_scripts( $loader_src ) {
 
@@ -10,27 +14,27 @@ function bfb_admin_scripts( $loader_src ) {
 
 	// 日付ピッカー
 	wp_enqueue_script( 'jquery-ui-datepicker' );
-	wp_enqueue_style( 'jquery-ui-css', plugins_url( 'css/jquery-ui.css', __FILE__ ) );
+	wp_enqueue_style( 'jquery-ui-css', plugins_url( 'css/jquery-ui.css', __FILE__ ), array(), BFB_PLUGIN_VERSION );
 
 	// カラーピッカー
 	wp_enqueue_style( 'wp-color-picker' );
 
 	// フォント
-	wp_enqueue_style( 'font-Montserrat', 'https://fonts.googleapis.com/css?family=Montserrat&display=swap' );
+	wp_enqueue_style( 'bfb_font_montserrat', plugins_url( 'css/bfb-font.css', __FILE__ ), array(), BFB_PLUGIN_VERSION );
 
 	// グラフ描画
 	global $hook_suffix;
 	if ( strpos( $hook_suffix, 'blog-floating-button' ) > -1 ) {
-		wp_enqueue_script( 'chart-min-js', plugins_url( 'js/Chart.min.js', __FILE__ ) );
-		wp_enqueue_script( 'chartjs-plugin-colorschemes-min-js', plugins_url( 'js/chartjs-plugin-colorschemes.min.js', __FILE__ ) );
+		wp_enqueue_script( 'chart-min-js', plugins_url( 'js/Chart.min.js', __FILE__ ), array(), BFB_PLUGIN_VERSION, true );
+		wp_enqueue_script( 'chartjs-plugin-colorschemes-min-js', plugins_url( 'js/chartjs-plugin-colorschemes.min.js', __FILE__ ), array( 'chart-min-js' ), BFB_PLUGIN_VERSION, true );
 	}
 
 	// table
-	wp_enqueue_script( 'jquery-dataTables-min-js', plugins_url( 'js/jquery.dataTables.min.js', __FILE__ ) );
-	wp_enqueue_style( 'jquery-dataTables-min-css', plugins_url( 'css/jquery.dataTables.min.css', __FILE__ ) );
+	wp_enqueue_script( 'jquery-dataTables-min-js', plugins_url( 'js/jquery.dataTables.min.js', __FILE__ ), array( 'jquery' ), BFB_PLUGIN_VERSION, true );
+	wp_enqueue_style( 'jquery-dataTables-min-css', plugins_url( 'css/jquery.dataTables.min.css', __FILE__ ), array(), BFB_PLUGIN_VERSION );
 
 	// 管理画面CSS
-	wp_enqueue_style( 'admin-bfb-style-css', plugins_url( 'css/admin_bfb_style.css', __FILE__ ) );
+	wp_enqueue_style( 'admin-bfb-style-css', plugins_url( 'css/admin_bfb_style.css', __FILE__ ), array(), BFB_PLUGIN_VERSION );
 }
 add_action( 'admin_enqueue_scripts', 'bfb_admin_scripts' );
 
@@ -38,10 +42,9 @@ add_action( 'admin_enqueue_scripts', 'bfb_admin_scripts' );
 function bfb_enqueue_scripts() {
 
 	wp_enqueue_script( 'jquery' );
-	wp_register_script( 'bfb_js_cookie', plugins_url( 'js/jquery.cookie.js', __FILE__ ), array(), '', true );
+	wp_register_script( 'bfb_js_cookie', plugins_url( 'js/jquery.cookie.js', __FILE__ ), array( 'jquery' ), BFB_PLUGIN_VERSION, true );
 	wp_enqueue_script( 'bfb_js_cookie' );
-	wp_enqueue_style( 'bfb_fontawesome_stylesheet', 'https://use.fontawesome.com/releases/v5.12.1/css/all.css' );
-	wp_enqueue_style( 'bfb_font_Montserrat', 'https://fonts.googleapis.com/css?family=Montserrat&display=swap' );
+	wp_enqueue_style( 'bfb_font_montserrat', plugins_url( 'css/bfb-font.css', __FILE__ ), array(), BFB_PLUGIN_VERSION );
 }
 add_action( 'wp_enqueue_scripts', 'bfb_enqueue_scripts' );
 
@@ -88,7 +91,7 @@ function bfb_fields() {
 function bfb_save_fields( $post_id ) {
 
 	// nonceを確認し値が正しくなければ何もしない
-	$nonce = isset( $_POST['_wpnonce_bfb'] ) ? $_POST['_wpnonce_bfb'] : null;
+	$nonce = isset( $_POST['_wpnonce_bfb'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce_bfb'] ) ) : '';
 	if ( ! wp_verify_nonce( $nonce, 'bfb_setting' ) ) {
 		return $post_id;
 	}
@@ -167,11 +170,12 @@ function bfb_save_category_fileds( $category_id ) {
 
 	$bfb = new BlogFloatingButton();
 
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- 直後の wp_verify_nonce() で検証している。nonce値自体を $_POST から取るため存在チェックが先行するのは避けられない
 	if ( ! $_POST ) {
 		return false; }
 
 	// nonceを確認し値が正しくなければ何もしない
-	$nonce = isset( $_POST['_wpnonce_bfb'] ) ? $_POST['_wpnonce_bfb'] : null;
+	$nonce = isset( $_POST['_wpnonce_bfb'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce_bfb'] ) ) : '';
 	if ( ! wp_verify_nonce( $nonce, 'bfb_setting' ) ) {
 		return $post_id;
 	}
@@ -318,6 +322,7 @@ add_action( 'plugins_loaded', 'bfb_activate' );
 // DBにアクセスログ、クリックログを残す
 function bfb_write_log() {
 
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- 未ログインの一般訪問者からアクセスログを受け取る公開エンドポイントのため nonce は適用できない
 	if ( empty( $_POST['data'] ) ) {
 		return false; }
 
@@ -426,7 +431,12 @@ function bfb_api_livePreview() {
 
 	$previewDatas['live_preview'] = true;
 	if ( $previewDatas ) {
-		return $bfb->generate_btn_html( $_POST['device'], $previewDatas );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- 管理画面のプレビュー生成のみを行い、値の保存や状態変更をしない読み取り専用エンドポイント。受け取った device は直後にホワイトリスト照合している
+		$device = isset( $_POST['device'] ) ? sanitize_text_field( wp_unslash( $_POST['device'] ) ) : '';
+		if ( ! in_array( $device, $bfb->devices, true ) ) {
+			return false;
+		}
+		return $bfb->generate_btn_html( $device, $previewDatas );
 	}
 }
 function bfb_livePreview_endpoint() {
@@ -555,17 +565,26 @@ function bfb_cleanup_analysis_logs() {
 		return;
 	} else {
 		// 取得した数値をUnixタイムスタンプに変換
-		$threshold_date = date( 'Y-m-d', strtotime( '-' . $threshold_date . ' days' ) );
+		$threshold_date = gmdate( 'Y-m-d', strtotime( '-' . $threshold_date . ' days' ) );
 		// ログを削除する処理を実装
 		global $wpdb;
 
+		$where  = array( 'date < %s' );
+		$params = array( $threshold_date );
+
 		// アクセスログを削除
 		$table_name = $wpdb->prefix . 'bfb_access_log';
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $table_name WHERE date < %s", $threshold_date ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定
+		$sql = "DELETE FROM $table_name WHERE " . implode( ' AND ', $where );
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql は固定の断片と %s プレースホルダのみで構成し値は prepare() でバインドしている。プラグイン独自テーブルの定期削除のため WP API では代替できず、削除処理にキャッシュは不要
+		$wpdb->query( $wpdb->prepare( $sql, $params ) );
 
 		// クリックログを削除
 		$table_name = $wpdb->prefix . 'bfb_click_log';
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $table_name WHERE date < %s", $threshold_date ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名は $wpdb->prefix 由来で固定
+		$sql = "DELETE FROM $table_name WHERE " . implode( ' AND ', $where );
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql は固定の断片と %s プレースホルダのみで構成し値は prepare() でバインドしている。プラグイン独自テーブルの定期削除のため WP API では代替できず、削除処理にキャッシュは不要
+		$wpdb->query( $wpdb->prepare( $sql, $params ) );
 	}
 }
 add_action( 'bfb_cleanup_logs_event', 'bfb_cleanup_analysis_logs' );

@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div class="bfb_box">
 
 <h3>不具合かな？と思ったら…</h3>
